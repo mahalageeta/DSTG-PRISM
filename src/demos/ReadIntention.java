@@ -14,18 +14,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 //import cern.colt.Arrays;
 public class ReadIntention {
-    static int numberofAgents = 0;
+    static int numberofIntention = 0;
     static Set<String> variables = new HashSet<String>();
     public static HashMap<String, Integer> ActionOutcomes = new HashMap<String, Integer>();
     final static Map<String, ArrayList<Integer>> ActionVarValues = new HashMap<>(); // key = var name and values =
                                                                                     // values
+    public static final Map<String, Map<String, Boolean>> actionsconsequences = new HashMap<>();
     final static Map<String, ArrayList<String>> MechRange = new HashMap<>();
-    public static HashMap<String, ArrayList<String>> AgentAction = new HashMap<String, ArrayList<String>>();
-    static ArrayList<String> AgentsName = new ArrayList<String>();
+    public static HashMap<String, ArrayList<String>> intentionAction = new HashMap<String, ArrayList<String>>();
+    static ArrayList<String> intentionId = new ArrayList<String>();
 
     public static void getStateTranProbGeneration() throws FileNotFoundException, IOException {
         for (Map.Entry mapElement : ActionOutcomes.entrySet()) {
@@ -40,7 +42,7 @@ public class ReadIntention {
 
     public static ArrayList<String> getAgentNames() throws FileNotFoundException, IOException {
 
-        return AgentsName;
+        return intentionId;
 
     }
 
@@ -52,13 +54,13 @@ public class ReadIntention {
 
     public static int getNumberOfAgent() throws FileNotFoundException, IOException {
 
-        return numberofAgents;
+        return numberofIntention;
 
     }
 
     public static HashMap<String, ArrayList<String>> getAgentMechanisms() throws FileNotFoundException, IOException {
 
-        return AgentAction;
+        return intentionAction;
 
     }
 
@@ -77,7 +79,7 @@ public class ReadIntention {
         Scanner sc = null;
 
         for (File file : filesList) {
-            ArrayList<String> setOfMech = new ArrayList<String>();
+            ArrayList<String> setOfActions = new ArrayList<String>();
             sc = new Scanner(file);
             String input;
             while (sc.hasNextLine()) {
@@ -85,7 +87,7 @@ public class ReadIntention {
                 // System.out.println(input);
                 String[] label = input.split(":");
                 String actionName = label[0].trim();
-                setOfMech.add(actionName);
+                setOfActions.add(actionName);
 
                 String[] m = label[1].split(Pattern.quote("(").trim(), 2);
                 String[] gaurd = m[1].split(Pattern.quote(",").trim(), 2);
@@ -173,18 +175,17 @@ public class ReadIntention {
 
     public static void getData(int scale) throws FileNotFoundException, IOException {
         System.out.println("get data");
-        // Creating a File object for directory
-        File directoryPath = new File("D:\\prism-master\\AgentsMech");
-        // List of all files and directories
+        File directoryPath = new File("Intentions");
         File filesList[] = directoryPath.listFiles();
         Scanner sc = null;
-        numberofAgents = filesList.length;
+        numberofIntention = filesList.length;
+        Map<String, Map<String, String>> result = new HashMap<>();
         for (File file : filesList) {
-            ArrayList<String> setOfMech = new ArrayList<String>();
-            // System.out.println("File name: "+file.getName());
-            AgentsName.add(file.getName());
-            // System.out.println("File path: "+file.getAbsolutePath());
-            // Instantiating the Scanner class
+            Map<String, ArrayList<String>> ActionVar = new HashMap<>();
+            Map<String, String> varValue = new HashMap<>();
+            ArrayList<String> setOfActions = new ArrayList<String>();
+            // System.out.println("File name: " + file.getName());
+            intentionId.add(file.getName());
             sc = new Scanner(file);
             String input;
             while (sc.hasNextLine()) {
@@ -192,44 +193,72 @@ public class ReadIntention {
                 // System.out.println(input);
                 String[] label = input.split(":");
                 String actionName = label[0].trim();
-                setOfMech.add(actionName);
-
-                String[] m = label[1].split(Pattern.quote("(").trim(), 2);
-                String[] gaurd = m[1].split(Pattern.quote(",").trim(), 2);
-                String[] mVar = gaurd[1].split(",(?![^\\(\\[]*[\\]\\)])");
+                setOfActions.add(actionName);
+                String[] mVar = label[1].split(",");
+                ArrayList<String> setOfvar = new ArrayList<String>();
                 for (int a = 0; a < mVar.length; a++) {
-                    if (mVar[a].contains("+=")) {
-                        String[] varNameValue = mVar[a].split(Pattern.quote("+="));
-                        if (varNameValue.length > 1) {
-                            String varName = varNameValue[0].trim();
-                            varName = varName.replaceAll("[{]", "");
-                            // System.out.println("varName "+varName);
-                            if (!(variables.contains(varName))) {
-                                variables.add(varName);
-                            }
-                        }
-                    }
+                    String varName = mVar[a].trim();
+                    // System.out.println("var " + varName);
+                    variables.add(varName);
+                    setOfvar.add(varName);
+                    varValue.put(varName, "true");
                 }
-                if (mVar[0].contains("+=")) {
-                    String[] varNameValue = mVar[0].split(Pattern.quote("+="));
-                    if (varNameValue.length > 1) {
-                        String varName = varNameValue[0].trim();
-                        varName = varName.replaceAll("[{]", "");
-                        String varRange = varNameValue[1].trim().replaceAll("[}\\[\\])]", "");
-                        if (varRange.contains(",")) {
-                            String[] range = varRange.split(Pattern.quote(",").trim());
-                            String min = range[0].trim();
-                            String max = range[1].trim();
-                            int consequence = (Integer.parseInt(max) - Integer.parseInt(min)) / scale;
-                            ActionOutcomes.put(actionName, consequence + 1);
+                ActionVar.put(actionName, setOfvar);
+                result.put(actionName, varValue);
 
-                        }
-                    }
-                }
             }
-            AgentAction.put(file.getName(), setOfMech);
+            intentionAction.put(file.getName(), setOfActions);
+            // System.out.println("ActionVar " + ActionVar);
+            // System.out.println("varValue " + varValue);
+            // System.out.println("Result " + result);
+            // combinedResult.put(file.getName(), result);
 
         }
+        System.out.println("intentionActions " + intentionAction);
+        System.out.println("Result " + result);
+        Map<String, Map<String, String>> combinedResult = new HashMap<>();
+        for (Map.Entry<String, ArrayList<String>> entry : intentionAction.entrySet()) {
+            String keyI = entry.getKey();
+            ArrayList<String> valuesI = entry.getValue();
+            System.out.println("Processing keyI: " + keyI);
+            System.out.println("Processing VlaueI: " + valuesI);
+            // Check if the Result map contains the key from intentionAction
+            for (int i = 0; i < valuesI.size(); i++) {
+                String element = valuesI.get(i);
+                System.out.println("Processing ValueI: " + element);
+                // Add your processing logic for each element here
+                if (result.containsKey(element)) {
+                    System.out.println("i M here");
+                    // // Retrieve the corresponding values from the Result map
+                    Map<String, String> valuesResult = result.get(element);
+                    System.out.println("valuesResult " + valuesResult);
+                    // // Create a new map to store the combined values
+                    HashMap<String, String> combinedValues = new HashMap<>();
+                    // // Iterate through the values from intentionAction
+                    for (String value : valuesI) {
+                        // // Check if the Result map contains this value
+                        if (valuesResult.containsKey(value)) {
+                            // // Add the value to the combinedValues map
+                            combinedValues.put(value, valuesResult.get(value));
+                            // System.out.println("Combined Values: " + combinedValues);
+                        }
+                    }
+
+                    // // Add the combinedValues map to the combinedResult map
+                    // combinedResult.put(keyI, combinedValues);
+
+                } else {
+
+                    System.out.println("Key not found in Result: " + keyI);
+
+                }
+            }
+
+        }
+        // Print the combined result
+        System.out.println("Combined Result:");
+        System.out.println(combinedResult);
+
     }
 
     public static void calculateStateTransitionProbability_New(String actionName, int randomSampleVaueGen)
@@ -299,5 +328,10 @@ public class ReadIntention {
         }
 
         return numbers;
+    }
+
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        System.out.println("Hello, World!");
+        getData(3);
     }
 }

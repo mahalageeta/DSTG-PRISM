@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ReadIntention",
+            "request": "launch",
+            "mainClass": "demos.ReadIntention",
+            "projectName": "prism-demos"
+        },
+        {
+            "type": "java",
             "name": "ModelCheckFromFiles",
             "request": "launch",
             "mainClass": "demos.ModelCheckFromFiles",
