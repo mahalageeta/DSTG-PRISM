@@ -1,0 +1,105 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "ModelCheckFromFiles",
+            "request": "launch",
+            "mainClass": "demos.ModelCheckFromFiles",
+            "projectName": "prism-demos"
+        },
+        {
+            "type": "java",
+            "name": "SimulateModel",
+            "request": "launch",
+            "mainClass": "demos.SimulateModel",
+            "projectName": "prism-demos"
+        },
+        {
+            "type": "java",
+            "name": "MDPModelGenerator",
+            "request": "launch",
+            "mainClass": "demos.MDPModelGenerator",
+            "projectName": "prism-demos"
+        },
+        {
+            "type": "java",
+            "name": "ModelCheckFromFiles",
+            "request": "launch",
+            "mainClass": "demo.ModelCheckFromFiles",
+            "projectName": "prism_e13ce100"
+        },
+        {
+            "type": "java",
+            "name": "MDPModelGenerator",
+            "request": "launch",
+            "mainClass": "demo.MDPModelGenerator",
+            "projectName": "prism_e13ce100"
+        },
+        {
+            "type": "java",
+            "name": "MDPModelGenerator",
+            "request": "launch",
+            "mainClass": "demo.MDPModelGenerator",
+            "projectName": "prism"
+        },
+        {
+            "type": "java",
+            "name": "ModelCheckFromFiles",
+            "request": "launch",
+            "mainClass": "demo.ModelCheckFromFiles",
+            "projectName": "prism",
+            "env": {
+                "PATH": "D:/GitHub/prism/prism/lib"
+            },
+            "vmArgs": "-Djava.library.path=D:/GitHub/prism/prism/lib"
+        },
+        {
+            "type": "java",
+            "name": "MDPModelGeneratorDSTG",
+            "request": "launch",
+            "mainClass": "demo.MDPModelGeneratorDSTG",
+            "projectName": "prism",
+            "env": {
+                "PATH": "D:/GitHub/prism/prism/lib"
+            },
+            "vmArgs": "-Djava.library.path=D:/GitHub/prism/prism/lib"
+        },
+        {
+            "type": "java",
+            "name": "ModelCheckFromFiles",
+            "request": "launch",
+            "mainClass": "ModelCheckFromFiles",
+            "projectName": "prism_c7c329b0",
+            "env": {
+                "PATH": "D:/GitHub/prism/prism/lib"
+            },
+            "vmArgs": "-Djava.library.path=D:/GitHub/prism/prism/lib"
+        },
+        {
+            "type": "java",
+            "name": "MDPModelGenerator",
+            "request": "launch",
+            "mainClass": "demo.MDPModelGenerator",
+            "projectName": "prism_c7c329b0",
+            "env": {
+                "PATH": "D:/GitHub/prism/prism/lib"
+            },
+            "vmArgs": "-Djava.library.path=D:/GitHub/prism/prism/lib"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "D:/GitHub/prism/prism/src/prism/PrismCL",
+            "env": {
+                "PATH": "D:/GitHub/prism/prism/lib"
+            },
+            "vmArgs": "-Djava.library.path=D:/GitHub/prism/prism/lib"
+        }
+    ]
+    
+}

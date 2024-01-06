@@ -1,0 +1,10 @@
+{
+    "java.project.referencedLibraries": [
+        "D:/GitHub/prism/prism/lib/*.jar"
+    ],
+    //"java.project.outputPath": "/home/gm168/prism/prism/prism/classes",
+    // "java.project.sourcePaths": [
+    //     "unit-tests",
+    //     "src"
+    // ]
+}
