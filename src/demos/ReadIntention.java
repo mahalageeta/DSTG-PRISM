@@ -29,42 +29,6 @@ public class ReadIntention {
     public static HashMap<String, ArrayList<String>> intentionAction = new HashMap<String, ArrayList<String>>();
     static ArrayList<String> intentionId = new ArrayList<String>();
 
-    public static ArrayList<String> getAgentNames() throws FileNotFoundException, IOException {
-
-        return intentionId;
-
-    }
-
-    public static ArrayList<String> getAgentActions() throws FileNotFoundException, IOException {
-
-        return intentionId;
-
-    }
-
-    public static Set<String> getVariables() throws FileNotFoundException, IOException {
-
-        return variables;
-
-    }
-
-    public static int getNumberOfAgent() throws FileNotFoundException, IOException {
-
-        return numberofIntention;
-
-    }
-
-    public static HashMap<String, ArrayList<String>> getAgentMechanisms() throws FileNotFoundException, IOException {
-
-        return intentionAction;
-
-    }
-
-    public static HashMap<String, Integer> getMechNoOfConse() throws FileNotFoundException, IOException {
-
-        return ActionOutcomes;
-
-    }
-
     public static void getData() throws FileNotFoundException, IOException {
         System.out.println("get data");
         Map<String, Map<String, String>> result = new HashMap<>();
@@ -73,7 +37,7 @@ public class ReadIntention {
         Scanner sc = null;
         numberofIntention = filesList.length;
         System.out.println("Number of Intnetion " + numberofIntention);
-        for (int f = 0; f <= filesList.length; f++) {
+        for (int f = 0; f < filesList.length; f++) {
             System.out.println(filesList[f].getName());
             File intList[] = filesList[f].listFiles();
             for (File f1 : intList) {
