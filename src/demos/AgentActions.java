@@ -17,11 +17,11 @@ public class AgentActions {
      * @param numberofAgents
      * @return
      */
-    public HashMap<Integer, ArrayList<String>> getAgentActions(int numberofAgents) {
+    public static HashMap<Integer, ArrayList<String>> getAgentActions(int numberofAgents) {
         HashMap<Integer, ArrayList<String>> AgentsActions = new HashMap<Integer, ArrayList<String>>();
         for (int a = 0; a < numberofAgents; a++) {
             int agentId = (a + 1);
-            // System.out.println("Agent "+ (a+1));
+            System.out.println("Agent " + (a + 1));
             ArrayList<String> MechanismA1 = new ArrayList<String>();
             try {
                 File myData = new File("D:\\prism-master\\AgentsMech\\Agent-" + (a + 1));
@@ -50,6 +50,7 @@ public class AgentActions {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         System.out.println("Hello, World!");
+        getAgentActions(1);
 
     }
 

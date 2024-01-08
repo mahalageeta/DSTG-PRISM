@@ -35,6 +35,12 @@ public class ReadIntention {
 
     }
 
+    public static ArrayList<String> getAgentActions() throws FileNotFoundException, IOException {
+
+        return intentionId;
+
+    }
+
     public static Set<String> getVariables() throws FileNotFoundException, IOException {
 
         return variables;
@@ -61,67 +67,71 @@ public class ReadIntention {
 
     public static void getData() throws FileNotFoundException, IOException {
         System.out.println("get data");
+        Map<String, Map<String, String>> result = new HashMap<>();
         File directoryPath = new File("Intentions");
         File filesList[] = directoryPath.listFiles();
         Scanner sc = null;
         numberofIntention = filesList.length;
-        Map<String, Map<String, String>> result = new HashMap<>();
-        for (File file : filesList) {
-            Map<String, ArrayList<String>> ActionVar = new HashMap<>();
+        System.out.println("Number of Intnetion " + numberofIntention);
+        for (int f = 0; f <= filesList.length; f++) {
+            System.out.println(filesList[f].getName());
+            File intList[] = filesList[f].listFiles();
+            for (File f1 : intList) {
+                Map<String, ArrayList<String>> ActionVar = new HashMap<>();
+                ArrayList<String> setOfActions = new ArrayList<String>();
+                intentionId.add(filesList[f].getName());
+                sc = new Scanner(f1);
+                String input;
+                while (sc.hasNextLine()) {
+                    input = sc.nextLine();
+                    System.out.println(input);
+                    String[] label = input.split(":");
+                    String actionName = label[0].trim();
+                    Map<String, String> varValue = new HashMap<>();
+                    setOfActions.add(actionName);
+                    String[] mVar = label[1].split(",");
+                    ArrayList<String> setOfvar = new ArrayList<String>();
+                    for (int a = 0; a < mVar.length; a++) {
+                        String varName = mVar[a].trim();
+                        System.out.println("var " + varName);
+                        variables.add(varName);
+                        setOfvar.add(varName);
+                        varValue.put(varName, "true");
+                    }
+                    ActionVar.put(actionName, setOfvar);
+                    result.put(actionName, varValue);
 
-            ArrayList<String> setOfActions = new ArrayList<String>();
-            // System.out.println("File name: " + file.getName());
-            intentionId.add(file.getName());
-            sc = new Scanner(file);
-            String input;
-            while (sc.hasNextLine()) {
-                input = sc.nextLine();
-                // System.out.println(input);
-                String[] label = input.split(":");
-                String actionName = label[0].trim();
-                Map<String, String> varValue = new HashMap<>();
-                setOfActions.add(actionName);
-                String[] mVar = label[1].split(",");
-                ArrayList<String> setOfvar = new ArrayList<String>();
-                for (int a = 0; a < mVar.length; a++) {
-                    String varName = mVar[a].trim();
-                    System.out.println("var " + varName);
-                    variables.add(varName);
-                    setOfvar.add(varName);
-                    varValue.put(varName, "true");
                 }
-                ActionVar.put(actionName, setOfvar);
-                result.put(actionName, varValue);
+                intentionAction.put(filesList[f].getName(), setOfActions);
+            }
+
+            System.out.println("intentionActions " + intentionAction);
+            System.out.println("Result " + result);
+
+            Map<String, Map<String, Map<String, String>>> combinedResult = new HashMap<>();
+            for (Map.Entry<String, ArrayList<String>> entry : intentionAction.entrySet()) {
+                String keyI = entry.getKey();
+                ArrayList<String> valuesI = entry.getValue();
+                Map<String, String> valuesResult = new HashMap<>();
+                System.out.println("=====Processing  current intention:=== " + keyI);
+                Map<String, Map<String, String>> combinedval = new HashMap<>();
+                for (int i = 0; i < valuesI.size(); i++) {
+                    String element = valuesI.get(i);
+                    if (result.containsKey(element)) {
+                        valuesResult = (result.get(element));
+                        combinedval.put(element, valuesResult);
+                    }
+                    System.out.println("check=== " + combinedval);
+                }
+                System.out.println("Set of actions in the current intnetions: " + valuesI);
+                System.out.println("valuesResult " + valuesResult);
+                System.out.println("==========Finish current intnetiom=========== " + keyI);
+                combinedResult.put(keyI, combinedval);
 
             }
-            intentionAction.put(file.getName(), setOfActions);
+            System.out.println("Combined Result:");
+            System.out.println(combinedResult);
         }
-        System.out.println("intentionActions " + intentionAction);
-        System.out.println("Result " + result);
-
-        Map<String, Map<String, Map<String, String>>> combinedResult = new HashMap<>();
-        for (Map.Entry<String, ArrayList<String>> entry : intentionAction.entrySet()) {
-            String keyI = entry.getKey();
-            ArrayList<String> valuesI = entry.getValue();
-            Map<String, String> valuesResult = new HashMap<>();
-            System.out.println("=====Processing  current intention:=== " + keyI);
-            Map<String, Map<String, String>> combinedval = new HashMap<>();
-            for (int i = 0; i < valuesI.size(); i++) {
-                String element = valuesI.get(i);
-                if (result.containsKey(element)) {
-                    valuesResult = (result.get(element));
-                    combinedval.put(element, valuesResult);
-                }
-                System.out.println("check=== " + combinedval);
-            }
-            System.out.println("Set of actions in the current intnetions: " + valuesI);
-            System.out.println("valuesResult " + valuesResult);
-            System.out.println("==========Finish current intnetiom=========== " + keyI);
-            combinedResult.put(keyI, combinedval);
-
-        }
-        System.out.println("Combined Result:");
-        System.out.println(combinedResult);
 
     }
 
