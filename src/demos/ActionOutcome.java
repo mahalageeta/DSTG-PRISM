@@ -39,7 +39,7 @@ public class ActionOutcome {
             // System.out.println("choice "+choice);
             for (int t = 0; t < transitions.get(choice); t++) {
                 try {
-                    String[] varValue = rst.getTransitionValueNew(t, choice);
+                    String[] varValue = rst.getTransitionValue(t, choice);
                     String varValues = Stream.of(varValue).collect(Collectors.joining(","));
                     choiceTranValues.add(varValues);
                 } catch (IOException e) {

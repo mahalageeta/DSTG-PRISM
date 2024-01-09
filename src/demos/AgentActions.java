@@ -16,41 +16,43 @@ public class AgentActions {
      * 
      * @param numberofAgents
      * @return
+     * @throws FileNotFoundException
      */
-    public static HashMap<Integer, ArrayList<String>> getAgentActions(int numberofAgents) {
+    public static HashMap<Integer, ArrayList<String>> getAgentActions(File f1) throws FileNotFoundException {
         HashMap<Integer, ArrayList<String>> AgentsActions = new HashMap<Integer, ArrayList<String>>();
-        for (int a = 0; a < numberofAgents; a++) {
-            int agentId = (a + 1);
-            System.out.println("Agent " + (a + 1));
-            ArrayList<String> MechanismA1 = new ArrayList<String>();
-            try {
-                File myData = new File("D:\\prism-master\\AgentsMech\\Agent-" + (a + 1));
-                Scanner myDataReader = new Scanner(myData);
-                String phi = "";
-                while (myDataReader.hasNextLine()) {
-                    ArrayList<Integer> Dvalues = new ArrayList<Integer>();
-                    String line = myDataReader.nextLine();
-                    String[] valueExtraction = line.split(Pattern.quote(":").trim(), 3);
-                    String mechanismName = valueExtraction[0].trim();
-                    MechanismA1.add(mechanismName);
+        Scanner sc = new Scanner(f1);
+        String input;
+        while (sc.hasNextLine()) {
+            input = sc.nextLine();
+            String[] label = input.split(":");
+            String actionName = label[0].trim();
 
-                }
-
-                myDataReader.close();
-            } catch (FileNotFoundException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
-
-            AgentsActions.put(agentId, MechanismA1);
         }
-        // System.out.println(AgentsMechanism);
+
         return AgentsActions;
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        System.out.println("Hello, World!");
-        getAgentActions(1);
+        System.out.println("Extracting agents Actions");
+        File directoryPath = new File("Intentions");
+        File filesList[] = directoryPath.listFiles();
+        Scanner sc = null;
+        Integer numberofIntention = filesList.length;
+        System.out.println("Number of Intnetion " + numberofIntention);
+        for (int f = 0; f < filesList.length; f++) {
+            Integer numerOfAgents = filesList.length;
+            System.out.println("Intention id " + filesList[f].getName());
+            System.out.println("Number of Agent " + numerOfAgents);
+            File intList[] = filesList[f].listFiles();
+            for (File f1 : intList) {
+                String agentName = f1.getName();
+                System.out.println("Agent Name " + agentName);
+                ArrayList<String> setOfActions = new ArrayList<String>();
+                getAgentActions(f1);
+
+            }
+
+        }
 
     }
 
