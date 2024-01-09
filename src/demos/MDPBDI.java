@@ -48,7 +48,7 @@ public class MDPBDI {
     static double w = 2.718;
     final static int randomSampleVaueGen = 2;
     final static int numberofAgents = 2;
-    public static HashMap<Integer, ArrayList<String>> AgentsActions = new HashMap<Integer, ArrayList<String>>();
+    public static HashMap<String, ArrayList<String>> AgentsActions = new HashMap<String, ArrayList<String>>();
     public static HashMap<Integer, Integer> transitionsVar = new HashMap<Integer, Integer>(); // key = transition or
                                                                                               // offset and value =
                                                                                               // varible index
@@ -93,16 +93,16 @@ public class MDPBDI {
         // ri.getInputsForPrism(randomSampleVaueGen,numberofAgents);
         // System.out.println("New Data Generated");
 
-        AgentActions am = new AgentActions();
-        AgentsActions = am.getAgentActions(numberofAgents);
+        ReadIntention ri = new ReadIntention();
+        AgentsActions = ri.getAgentActions();
         System.out.println("Agents Action " + AgentsActions);
 
         Transitions at = new Transitions();
         transitions = at.getActionsTransitions();
         System.out.println("Choice and it's transitions " + transitions);
 
-        ActionConValues acv = new ActionConValues();
-        transitionValues = acv.getCombinedMechExecutionValues(transitions);
+        ActionOutcome acv = new ActionOutcome();
+        transitionValues = acv.getActiionTransitionValue(transitions);
         System.out.println(" Value In each Transitions " + transitionValues);
 
         Set<String> variablesSet = new HashSet<String>();

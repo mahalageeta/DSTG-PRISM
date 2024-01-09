@@ -28,6 +28,9 @@ public class ReadIntention {
     final static Map<String, ArrayList<String>> MechRange = new HashMap<>();
     public static HashMap<String, ArrayList<String>> intentionAction = new HashMap<String, ArrayList<String>>();
     static ArrayList<String> intentionId = new ArrayList<String>();
+    public static HashMap<String, ArrayList<String>> AgentsActions = new HashMap<String, ArrayList<String>>();
+    public static HashMap<String, Integer> transitions = new HashMap<String, Integer>(); // key = transition or offset
+    // and value = varible index
 
     public static void getData() throws FileNotFoundException, IOException {
         System.out.println("get data");
@@ -38,9 +41,11 @@ public class ReadIntention {
         numberofIntention = filesList.length;
         System.out.println("Number of Intnetion " + numberofIntention);
         for (int f = 0; f < filesList.length; f++) {
-            System.out.println(filesList[f].getName());
+            System.out.println("Intention id " + filesList[f].getName());
             File intList[] = filesList[f].listFiles();
             for (File f1 : intList) {
+                String agentName = f1.getName();
+                System.out.println("Agent Name " + agentName);
                 Map<String, ArrayList<String>> ActionVar = new HashMap<>();
                 ArrayList<String> setOfActions = new ArrayList<String>();
                 intentionId.add(filesList[f].getName());
@@ -48,7 +53,7 @@ public class ReadIntention {
                 String input;
                 while (sc.hasNextLine()) {
                     input = sc.nextLine();
-                    System.out.println(input);
+                    // System.out.println(input);
                     String[] label = input.split(":");
                     String actionName = label[0].trim();
                     Map<String, String> varValue = new HashMap<>();
@@ -67,9 +72,11 @@ public class ReadIntention {
 
                 }
                 intentionAction.put(filesList[f].getName(), setOfActions);
+                AgentsActions.put(agentName, setOfActions);
             }
 
             System.out.println("intentionActions " + intentionAction);
+            System.out.println("Agent Actions " + AgentsActions);
             System.out.println("Result " + result);
 
             Map<String, Map<String, Map<String, String>>> combinedResult = new HashMap<>();
@@ -99,8 +106,17 @@ public class ReadIntention {
 
     }
 
+    public static HashMap<String, ArrayList<String>> getAgentActions() throws FileNotFoundException, IOException {
+
+        return AgentsActions;
+
+    }
+
     public static void main(String[] args) throws FileNotFoundException, IOException {
         System.out.println("Hello, World!");
+        HashMap<String, ArrayList<String>> AgentsActionsCheck = new HashMap<String, ArrayList<String>>();
         getData();
+        AgentsActionsCheck = getAgentActions();
+        System.out.println("Main " + AgentsActionsCheck);
     }
 }

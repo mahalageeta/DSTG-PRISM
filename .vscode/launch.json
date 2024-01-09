@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Transitions",
+            "request": "launch",
+            "mainClass": "demos.Transitions",
+            "projectName": "prism-demos"
+        },
+        {
+            "type": "java",
             "name": "AgentActions",
             "request": "launch",
             "mainClass": "demos.AgentActions",
