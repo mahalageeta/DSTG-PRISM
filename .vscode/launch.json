@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MDPBDI",
+            "request": "launch",
+            "mainClass": "demos.MDPBDI",
+            "projectName": "prism-demos"
+        },
+        {
+            "type": "java",
             "name": "Transitions",
             "request": "launch",
             "mainClass": "demos.Transitions",

@@ -16,34 +16,31 @@ public class Transitions {
      * @return
      * @throws IOException
      */
-    public static HashMap<String, Integer> getActionsTransitions(File intList[]) throws IOException {
+    public static HashMap<String, Integer> getActionsTransitions(String currrentInten) throws IOException {
         HashMap<String, Integer> Actiontransitions = new HashMap<String, Integer>();
         ArrayList<String> actions = new ArrayList<String>();
-        for (File f1 : intList) {
-            String actionname = f1.getName();
-            List<String> transitions = Files.readAllLines(Paths.get(f1.getAbsolutePath()));
-            actions.add(f1.getName());
-            Actiontransitions.put(actionname, transitions.size());
+        File subfolder = new File("src\\demos\\Data\\AgentTranProb", currrentInten);
+        if (subfolder.exists() && subfolder.isDirectory()) {
+            File[] files = subfolder.listFiles();
+            if (files != null && files.length > 0) {
+                for (File file : files) {
+                    String actionname = file.getName();
+                    List<String> transitions = Files.readAllLines(Paths.get(file.getAbsolutePath()));
+                    actions.add(file.getName());
+                    Actiontransitions.put(actionname, transitions.size());
+
+                }
+            } else {
+                System.out.println("Actions infromation is not provided");
+            }
+        } else {
+            System.out.println("Intnetion information not exist");
         }
-        // System.out.println("set of actions " + actions);
-        // System.out.println("Transitions " + Actiontransitions);
+
+        System.out.println("set of actions " + actions);
+        System.out.println("Transitions " + Actiontransitions);
         return Actiontransitions;
 
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-        System.out.println("Transition Probability");
-        File directoryPath = new File("src\\demos\\Data\\AgentTranProb");
-        File filesList[] = directoryPath.listFiles();
-        for (int f = 0; f < filesList.length; f++) {
-            HashMap<String, Integer> Actiontransitions = new HashMap<String, Integer>();
-            System.out.println("Intention id " + filesList[f].getName());
-            File intList[] = filesList[f].listFiles();
-            ArrayList<String> actions = new ArrayList<String>();
-            Actiontransitions = getActionsTransitions(intList);
-            System.out.println("Transitions " + Actiontransitions);
-
-        }
-
-    }
 }
