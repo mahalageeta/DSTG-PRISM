@@ -24,17 +24,20 @@ public class ReadIntention {
     public static Map<String, ArrayList<String>> getAgentActions(String currrentInten)
             throws FileNotFoundException, IOException {
         File directoryPath = new File("Intentions");
-        Map<String, ArrayList<String>> agentActions = new HashMap<>();
         File filesList[] = directoryPath.listFiles();
         File subfolder = new File("Intentions", currrentInten);
+        Map<String, ArrayList<String>> agentActions = new HashMap<>();
         Scanner sc = null;
         if (subfolder.exists() && subfolder.isDirectory()) {
+
             File[] files = subfolder.listFiles();
             if (files != null && files.length > 0) {
                 // System.out.println("Files in subfolder " + currrentInten + " of folder " +
                 // "Intentions" + ":");
-                ArrayList<String> setOfActions = new ArrayList<String>();
+
+                Map<String, ArrayList<String>> agentActions1 = new HashMap<>();
                 for (File file : files) {
+                    ArrayList<String> setOfActions = new ArrayList<String>();
                     String agentName = file.getName();
                     // System.out.println("Agent Name " + agentName);
                     sc = new Scanner(file);
@@ -48,7 +51,9 @@ public class ReadIntention {
 
                     }
 
-                    agentActions.put(agentName, setOfActions);
+                    // System.out.println(setOfActions);
+                    agentActions1.put(agentName, setOfActions);
+                    agentActions.putAll(agentActions1);
                 }
             } else {
                 System.out.println("There is no information for intnetion id" + currrentInten);
@@ -60,34 +65,44 @@ public class ReadIntention {
         }
 
         // System.out.println("check " + result);
-        // System.out.println(agentActions);
+
         return agentActions;
 
     }
 
-    public static Set<String> getvaribles(String currrentInten)
+    public static Map<String, Set<String>> getvaribles(String currrentInten)
             throws FileNotFoundException, IOException {
-        Set<String> varibles = new HashSet<String>();
-        ;
+
+        Map<String, Set<String>> agentvar = new HashMap<>();
         File directoryPath = new File("Intentions");
         File filesList[] = directoryPath.listFiles();
         File subfolder = new File("Intentions", currrentInten);
         Scanner sc = null;
         if (subfolder.exists() && subfolder.isDirectory()) {
             File[] files = subfolder.listFiles();
-
             if (files != null && files.length > 0) {
-                System.out.println("Files in subfolder " + currrentInten + " of folder " + "Intentions" + ":");
+
                 for (File file : files) {
+
+                    String agentName = file.getName();
                     sc = new Scanner(file);
                     String input;
+
                     while (sc.hasNextLine()) {
+                        Set<String> varibles = new HashSet<String>();
                         input = sc.nextLine();
+                        // System.out.println("input " + input);
+                        String actionName = "";
                         String[] label = input.split(":");
-                        String actionName = label[1].trim();
-                        varibles.add(actionName);
+                        String actionVar = label[1].trim();
+                        actionName = label[0].trim();
+                        // System.out.println("actionName " + actionName);
+                        // System.out.println("actionVar " + actionVar);
+                        varibles.add(actionVar);
+                        agentvar.put(actionName, varibles);
 
                     }
+
                 }
             } else {
                 System.out.println("There is no information for intnetion id" + currrentInten);
@@ -98,7 +113,7 @@ public class ReadIntention {
 
         }
 
-        return varibles;
+        return agentvar;
 
     }
 
