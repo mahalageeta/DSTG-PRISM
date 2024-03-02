@@ -246,7 +246,8 @@ public class MDPModelGeneratorDSTG {
 
         @Override
         public State getInitialState() throws PrismException {
-            // System.out.println("getInitialState");
+            System.out.println("getInitialState");
+
             return new State(variables.size()).setValue(0, 1).setValue(1, 10).setValue(2,
                     0);
         }
@@ -369,33 +370,32 @@ public class MDPModelGeneratorDSTG {
 
         }
 
-@Override
-/**
-* Get the action label of a transition within a choice, specified by its
-* index/offset.
-* The label can be any Object, but will often be treated as a string, so it
-* should at least
-* have a meaningful toString() method implemented. Absence of an action label
-* is denoted by null.
-* Note: For most types of models, the action label will be the same for all
-* transitions within
-* the same nondeterministic choice (i.e. for each different value of
-* {@code offset}),
-* but for Markov chains this may not necessarily be the case.
-*
-* @param i Index of the nondeterministic choice
-* @param offset Index of the transition within the choice
-*/
+        @Override
+        /**
+         * Get the action label of a transition within a choice, specified by its
+         * index/offset.
+         * The label can be any Object, but will often be treated as a string, so it
+         * should at least
+         * have a meaningful toString() method implemented. Absence of an action label
+         * is denoted by null.
+         * Note: For most types of models, the action label will be the same for all
+         * transitions within
+         * the same nondeterministic choice (i.e. for each different value of
+         * {@code offset}),
+         * but for Markov chains this may not necessarily be the case.
+         *
+         * @param i      Index of the nondeterministic choice
+         * @param offset Index of the transition within the choice
+         */
 
-public Object getTransitionAction(int i, int offset) throws PrismException {
-int agent = valueOfVariable.get(variables.get(0));
-String action = AgentsName.get(agent - 1);
-// System.out.println("Transit Action agent = "+agent+" Agent Name "+
-action);
+        public Object getTransitionAction(int i, int offset) throws PrismException {
+            int agent = valueOfVariable.get(variables.get(0));
+            String action = AgentsName.get(agent - 1);
+            // System.out.println("Transit Action agent = "+agent+" Agent Name "+action);
 
-// return action;
-return action;
-}
+            // return action;
+            return action;
+        }
 
         @Override
         public Object getTransitionProbability(int i, int offset) throws PrismException {

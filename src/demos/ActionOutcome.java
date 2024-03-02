@@ -13,11 +13,11 @@ public class ActionOutcome {
     public static ArrayList<String> getExecutionValuesNew(String currentInten, HashMap<String, Integer> transitions) {
         ReadingStateTransition rst = new ReadingStateTransition();
         ArrayList<String> choiceTranValues = new ArrayList<String>();
-        // System.out.println("check number of transistions" + transitions);
+        System.out.println("check number of transistions" + transitions);
         List<String> keys = new ArrayList<>(transitions.keySet());
         for (int k = 0; k < keys.size(); k++) {
             String choice = keys.get(k);
-            // System.out.println("choice " + choice);
+            System.out.println("choice " + choice);
             for (int t = 0; t < transitions.get(choice); t++) {
                 try {
                     // System.out.println("here " + t);
@@ -30,7 +30,31 @@ public class ActionOutcome {
             }
 
         }
-        // System.out.println("choiceTranVal " + choiceTranValues);
+        System.out.println("choiceTranVal " + choiceTranValues);
         return choiceTranValues;
+    }
+
+    public static ArrayList<String> getExecutionProb(String currentInten, HashMap<String, Integer> transitions) {
+        ReadingStateTransition rst = new ReadingStateTransition();
+        ArrayList<String> choiceTranProb = new ArrayList<String>();
+        System.out.println("check number of transistions" + transitions);
+        List<String> keys = new ArrayList<>(transitions.keySet());
+        for (int k = 0; k < keys.size(); k++) {
+            String choice = keys.get(k);
+            System.out.println("choice " + choice);
+            for (int t = 0; t < transitions.get(choice); t++) {
+                try {
+                    System.out.println("here " + t);
+                    String[] varValue = rst.getTransitionProb(currentInten, t, choice);
+                    String varValues = Stream.of(varValue).collect(Collectors.joining(","));
+                    choiceTranProb.add(varValues);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        System.out.println("choiceTranProb " + choiceTranProb);
+        return choiceTranProb;
     }
 }

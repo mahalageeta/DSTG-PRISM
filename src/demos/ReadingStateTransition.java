@@ -25,4 +25,18 @@ public class ReadingStateTransition {
         return eachValue;
 
     }
+
+    static String[] getTransitionProb(String currentInten, int offset, String actionName) throws IOException {
+
+        Path path = Paths.get("src\\demos\\Data\\AgentTranProb\\" + currentInten + "\\" + actionName);
+        List<String> totalTransitions = Files.readAllLines(path, StandardCharsets.UTF_8);
+        System.out.println("total transitions" + totalTransitions);
+        String StateTran = totalTransitions.get(offset);
+        System.out.println("StateTran " + StateTran);
+        String[] varValue = StateTran.split(":");
+        String Values = varValue[1].trim();
+        String[] eachValue = Values.split(",");
+        return eachValue;
+
+    }
 }

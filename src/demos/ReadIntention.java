@@ -21,13 +21,10 @@ import parser.ast.SystemBrackets;
 
 //import cern.colt.Arrays;
 public class ReadIntention {
-    public static Map<String, Map<String, Map<String, String>>> getAgentActions(String currrentInten)
+    public static Map<String, ArrayList<String>> getAgentActions(String currrentInten)
             throws FileNotFoundException, IOException {
-
-        Set<String> variables = new HashSet<String>();
         File directoryPath = new File("Intentions");
-        Map<String, Map<String, String>> result = new HashMap<>();
-        Map<String, Map<String, Map<String, String>>> agentActions = new HashMap<>();
+        Map<String, ArrayList<String>> agentActions = new HashMap<>();
         File filesList[] = directoryPath.listFiles();
         File subfolder = new File("Intentions", currrentInten);
         Scanner sc = null;
@@ -36,7 +33,6 @@ public class ReadIntention {
             if (files != null && files.length > 0) {
                 // System.out.println("Files in subfolder " + currrentInten + " of folder " +
                 // "Intentions" + ":");
-                Map<String, ArrayList<String>> ActionVar = new HashMap<>();
                 ArrayList<String> setOfActions = new ArrayList<String>();
                 for (File file : files) {
                     String agentName = file.getName();
@@ -48,23 +44,11 @@ public class ReadIntention {
                         // System.out.println(input);
                         String[] label = input.split(":");
                         String actionName = label[0].trim();
-                        Map<String, String> varValue = new HashMap<>();
                         setOfActions.add(actionName);
-                        String[] mVar = label[1].split(",");
-                        ArrayList<String> setOfvar = new ArrayList<String>();
-                        for (int a = 0; a < mVar.length; a++) {
-                            String varName = mVar[a].trim();
-                            // System.out.println("var " + varName);
-                            variables.add(varName);
-                            setOfvar.add(varName);
-                            varValue.put(varName, "true");
-                        }
-                        ActionVar.put(actionName, setOfvar);
-                        result.put(actionName, varValue);
 
                     }
 
-                    agentActions.put(agentName, result);
+                    agentActions.put(agentName, setOfActions);
                 }
             } else {
                 System.out.println("There is no information for intnetion id" + currrentInten);
@@ -78,6 +62,43 @@ public class ReadIntention {
         // System.out.println("check " + result);
         // System.out.println(agentActions);
         return agentActions;
+
+    }
+
+    public static Set<String> getvaribles(String currrentInten)
+            throws FileNotFoundException, IOException {
+        Set<String> varibles = new HashSet<String>();
+        ;
+        File directoryPath = new File("Intentions");
+        File filesList[] = directoryPath.listFiles();
+        File subfolder = new File("Intentions", currrentInten);
+        Scanner sc = null;
+        if (subfolder.exists() && subfolder.isDirectory()) {
+            File[] files = subfolder.listFiles();
+
+            if (files != null && files.length > 0) {
+                System.out.println("Files in subfolder " + currrentInten + " of folder " + "Intentions" + ":");
+                for (File file : files) {
+                    sc = new Scanner(file);
+                    String input;
+                    while (sc.hasNextLine()) {
+                        input = sc.nextLine();
+                        String[] label = input.split(":");
+                        String actionName = label[1].trim();
+                        varibles.add(actionName);
+
+                    }
+                }
+            } else {
+                System.out.println("There is no information for intnetion id" + currrentInten);
+            }
+
+        } else {
+            System.out.println("The Intention folder is empty");
+
+        }
+
+        return varibles;
 
     }
 

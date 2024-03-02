@@ -37,8 +37,8 @@ public class Transitions {
             System.out.println("Intnetion information not exist");
         }
 
-        System.out.println("set of actions " + actions);
-        System.out.println("Transitions " + Actiontransitions);
+        // System.out.println("set of actions " + actions);
+        // System.out.println("Transitions " + Actiontransitions);
         return Actiontransitions;
 
     }
