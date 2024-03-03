@@ -205,14 +205,14 @@ public class MDPBDI {
 
             transitionValueG.putAll(transitionValue);
 
-            System.out.println("numberofAgents = " + numberofAgents);
-            System.out.println("AgentsNameG " + AgentsNameG);
-            System.out.println("AgentsActionsG " + AgentsActionsG);
-            System.out.println("variablesG " + variablesG);
-            System.out.println("variblesextractedG " + variblesextractedG);
-            System.out.println("transitionValueG " + transitionValueG);
-            System.out.println("transitionProbG " + transitionProbG);
-            System.out.println("AgenttransitionValueG " + AgenttransitionValueG);
+            // // System.out.println("numberofAgents = " + numberofAgents);
+            // System.out.println("AgentsNameG " + AgentsNameG);
+            // System.out.println("AgentsActionsG " + AgentsActionsG);
+            // System.out.println("variablesG " + variablesG);
+            // System.out.println("variblesextractedG " + variblesextractedG);
+            // System.out.println("transitionValueG " + transitionValueG);
+            // System.out.println("transitionProbG " + transitionProbG);
+            // System.out.println("AgenttransitionValueG " + AgenttransitionValueG);
 
             Instant start = Instant.now();
             new MDPBDI().run();
@@ -250,7 +250,7 @@ public class MDPBDI {
             // Then do some model checking and print the result
             String[] props = new String[] {
                     "P>=0.7[p1=true U<=5 q1=flase]",
-                    "Pmax=?[F \"goal1\"]"
+                    "Pmax=?[F \"target\"]"
 
             };
             for (String prop : props) {
@@ -273,7 +273,6 @@ public class MDPBDI {
     class MDPModel implements ModelGenerator {
         private State exploreState;
         HashMap<String, Boolean> valueOfVariable = new HashMap<String, Boolean>();
-        // HashMap<String, Object> valueOfVariable = new HashMap<>();
 
         public MDPModel() {
         }
@@ -321,8 +320,8 @@ public class MDPBDI {
         @Override
         public DeclarationType getVarDeclarationType(int i) throws PrismException {
             Type type = getVarType(i);
-            System.out
-                    .println("getVarDeclarationType value of i = " + i + " DeclarationBool()" + new DeclarationBool());
+            // System.out.println("getVarDeclarationType value of i = " + i + "
+            // DeclarationBool()" + new DeclarationBool());
             return new DeclarationBool();
         }
 
@@ -331,7 +330,8 @@ public class MDPBDI {
         @Override
         public List<String> getLabelNames() {
             System.out.println("getLabelNames");
-            return Arrays.asList("achivement", "maintain");
+            return Arrays.asList("target");
+            // return Arrays.asList("achivement", "maintain");
         }
 
         @Override
@@ -516,23 +516,14 @@ public class MDPBDI {
         @Override
         public boolean isLabelTrue(int i) throws PrismException {
 
-            List<String> extractedValues = new ArrayList<>();
-            for (Set<String> values : variablesG.values()) {
-                extractedValues.addAll(values);
-            }
             switch (i) {
-                // achievement
                 case 0:
-
-                    // return valueOfVariable.get(variablesG.get(1)) > 1;
-                    // maintain
-                case 1:
-
-                    // return valueOfVariable.get(variablesG.get(1)) < 2;
-
+                    // "target" (top-right corner)
+                    return "p1".equals("true") && "p2".equals("true");
                 default:
                     throw new PrismException("Label number \"" + i + "\" not defined");
             }
+
         }
 
     }

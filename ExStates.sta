@@ -1,0 +1,4 @@
+(q1,q2,q11,q21,p11,p21,p31,p1,p2,p3)
+0:(false,false,false,false,false,false,false,false,false,false)
+1:(false,false,false,false,false,false,false,false,true,false)
+2:(false,false,false,false,false,false,false,true,false,false)
