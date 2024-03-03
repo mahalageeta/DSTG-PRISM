@@ -1,2 +1,2 @@
-true:0.8
-flase:0.2
+true,false:0.4
+false,true:0.6

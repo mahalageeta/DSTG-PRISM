@@ -1,2 +1,3 @@
-true:0.7
-flase:0.3
+true,flase,false:0.6
+flase,true,false:0.20
+flase,flase,true:0.20

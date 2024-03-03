@@ -46,13 +46,14 @@ import prism.PrismLog;
 
 public class MDPBDI {
     public static HashMap<Integer, ArrayList<String>> AgenttransitionValueG = new HashMap<Integer, ArrayList<String>>();
-    public static HashMap<Integer, ArrayList<Double>> SelectionTransitionProb = new HashMap<Integer, ArrayList<Double>>();
+    public static HashMap<String, ArrayList<Double>> SelectionTransitionProb = new HashMap<String, ArrayList<Double>>();
     public static HashMap<String, ArrayList<Double>> transitionProbG = new HashMap<String, ArrayList<Double>>();
     public static Map<String, Set<String>> variablesG = new HashMap();
     public static ArrayList<String> AgentsNameG = new ArrayList<String>();
     public static HashMap<Integer, ArrayList<String>> AgentsActionsG = new HashMap<Integer, ArrayList<String>>();
     public static HashMap<String, ArrayList<String>> transitionValueG = new HashMap<String, ArrayList<String>>();
     static int numberofAgents = 0;
+    public static ArrayList<String> variblesextractedG = new ArrayList<String>();
 
     public static void main(String[] args) throws IOException {
 
@@ -188,22 +189,37 @@ public class MDPBDI {
                 transitionValueG.clear();
             }
 
+            List<String> extractedValues = new ArrayList<>();
+            for (Set<String> values : variablesG.values()) {
+                extractedValues.addAll(values);
+            }
+            List<String> result = extractedValues.stream()
+                    .map(s -> Arrays.asList(s.split(",")))
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+
+            if (!variblesextractedG.isEmpty()) {
+                variblesextractedG.clear();
+            }
+            variblesextractedG.addAll(result);
+
             transitionValueG.putAll(transitionValue);
 
             System.out.println("numberofAgents = " + numberofAgents);
             System.out.println("AgentsNameG " + AgentsNameG);
             System.out.println("AgentsActionsG " + AgentsActionsG);
             System.out.println("variablesG " + variablesG);
+            System.out.println("variblesextractedG " + variblesextractedG);
             System.out.println("transitionValueG " + transitionValueG);
             System.out.println("transitionProbG " + transitionProbG);
             System.out.println("AgenttransitionValueG " + AgenttransitionValueG);
 
-            // Instant start = Instant.now();
-            // new MDPBDI().run();
+            Instant start = Instant.now();
+            new MDPBDI().run();
 
-            // Instant end = Instant.now();
-            // Duration timeElapsed = Duration.between(start, end);
-            // System.out.println("Time taken: " + timeElapsed.toMillis() + "milliseconds");
+            Instant end = Instant.now();
+            Duration timeElapsed = Duration.between(start, end);
+            System.out.println("Time taken: " + timeElapsed.toMillis() + "milliseconds");
 
             System.out.println("=================  END  ====================");
 
@@ -270,19 +286,21 @@ public class MDPBDI {
 
         @Override
         public List<String> getVarNames() {
-            System.out.println(" getVarNames = " + variablesG);
-            return variablesG;
+
+            System.out.println("getVarNames" + variblesextractedG);
+            System.out.println("Total Number of varibles =" + variblesextractedG.size());
+
+            return variblesextractedG;
 
         }
 
         @Override
         public List<Type> getVarTypes() {
             List<Type> resultList = new ArrayList<>();
-            for (int i = 0; i < variablesG.size(); i++) {
+
+            for (int i = 0; i < variblesextractedG.size(); i++) {
                 resultList.add(TypeBool.getInstance());
             }
-            // return Arrays.asList(TypeInt.getInstance(), TypeBool.getInstance(),
-            // TypeBool.getInstance());
             System.out.println("getVarTypes = " + resultList);
             return resultList;
         }
@@ -290,9 +308,9 @@ public class MDPBDI {
         @Override
         public State getInitialState() throws PrismException {
             System.out.println(" getInitialState ");
-            State initialState = new State(variablesG.size());
-            initialState = initialState.setValue(0, 0);
-            for (int i = 1; i < variablesG.size(); i++) {
+            State initialState = new State(variblesextractedG.size());
+            // initialState = initialState.setValue(0, 0);
+            for (int i = 0; i < variblesextractedG.size(); i++) {
                 initialState = initialState.setValue(i, false);
             }
 
@@ -302,14 +320,9 @@ public class MDPBDI {
 
         @Override
         public DeclarationType getVarDeclarationType(int i) throws PrismException {
-            System.out.println("getVarDeclarationType " + i);
             Type type = getVarType(i);
-            // if (i == 0) {
-            // return new DeclarationInt(Expression.Int(1), Expression.Int(2));
-            // } else {
-            // return new DeclarationBool();
-            // }
-
+            System.out
+                    .println("getVarDeclarationType value of i = " + i + " DeclarationBool()" + new DeclarationBool());
             return new DeclarationBool();
         }
 
@@ -327,12 +340,12 @@ public class MDPBDI {
             System.out.println();
             System.out.println("=============== exploreState================== " + exploreState);
             this.exploreState = exploreState;
-            // valueOfVariable.put(variablesG.get(0), ((Integer)
-            // exploreState.varValues[0]).intValue());
-            for (int s = 0; s < variablesG.size(); s++) {
-                valueOfVariable.put(variablesG.get(s), ((Boolean) exploreState.varValues[s]).booleanValue());
+            for (int s = 0; s < variblesextractedG.size(); s++) {
+                valueOfVariable.put(variblesextractedG.get(s), ((Boolean) exploreState.varValues[s]).booleanValue());
 
             }
+
+            System.out.println("===============  valueOfVariable================== " + valueOfVariable);
 
         }
 
@@ -348,26 +361,36 @@ public class MDPBDI {
         public int getNumTransitions(int i) throws PrismException {
             System.out.println("getNumTransitions and value of i = " + i);
             int transitions = 0;
-            int agent = (int) valueOfVariable.get(variablesG.get(0));
+            // Extract sequential order of actions
+            ArrayList<String> sequenceOfActions = new ArrayList<>();
+            for (ArrayList<String> actions : AgentsActionsG.values()) {
+                sequenceOfActions.addAll(actions);
+            }
+            System.out.println("sequenceOfActions" + sequenceOfActions);
+            // int agent = (int) valueOfVariable.get(variablesG.get(0));
             // System.out.println("agent = " + agent + " " + AgentsNameG.get(agent - 1));
-            ArrayList<Double> SelectionExecutionprob = new ArrayList<Double>();
-            for (int a = 0; a < AgentsActionsG.get(agent).size(); a++) {
-                String action = AgentsActionsG.get(agent).get(a);
+
+            for (int a = 0; a < sequenceOfActions.size(); a++) {
+                ArrayList<Double> SelectionExecutionprob = new ArrayList<Double>();
+                String action = sequenceOfActions.get(a);
                 System.out.println("action " + action);
-                transitions = transitions + transitionProbG.get(action).size();
+                transitions = transitionProbG.get(action).size();
+                System.out.println("number of transitions " + transitions);
+                System.out.println("transitionProbG " + transitionProbG);
                 for (int t = 0; t < transitionProbG.get(action).size(); t++) {
                     double prob = transitionProbG.get(action).get(t);
                     System.out.println("execution " + prob);
                     prob = Double.parseDouble(new DecimalFormat("##.###").format(prob));
-                    System.out.println("execution  " + prob);
+                    // System.out.println("execution " + prob);
                     SelectionExecutionprob.add(prob);
                 }
 
-                SelectionTransitionProb.put(agent, SelectionExecutionprob);
+                SelectionTransitionProb.put(action, SelectionExecutionprob);
 
             }
 
-            System.out.println("number of transitions = " + transitions);
+            // System.out.println("number of transitions = " + transitions);
+            System.out.println("SelectionTransitionProb = " + SelectionTransitionProb);
             return transitions;
         }
 
@@ -390,18 +413,39 @@ public class MDPBDI {
          */
 
         public Object getTransitionAction(int i, int offset) throws PrismException {
-            int agent = (int) valueOfVariable.get(variablesG.get(0));
-            String action = AgentsNameG.get(agent - 1);
-            System.out.println("Transit Action agent = " + agent + " Agent Name " + action);
+            System.out.println(" getTransitionAction " + " value of i = " + i + "offset = " + offset);
+            ArrayList<String> sequenceOfActions = new ArrayList<>();
+            for (ArrayList<String> actions : AgentsActionsG.values()) {
+                sequenceOfActions.addAll(actions);
+            }
+            System.out.println("sequenceOfActions" + sequenceOfActions);
+            //// int agent = (int) valueOfVariable.get(variablesG.get(0));
+            // String action = AgentsNameG.get(agent - 1);
+            String action = sequenceOfActions.get(i);
+            System.out.println("Transit Action  Name " + action);
             return action;
 
         }
 
         @Override
         public Double getTransitionProbability(int i, int offset) throws PrismException {
-            int agent = (int) valueOfVariable.get(variablesG.get(0));
-            System.out.println(" agent " + agent);
-            double prob = SelectionTransitionProb.get(agent).get(offset);
+            // int agent = (int) valueOfVariable.get(variablesG.get(0));
+            System.out.println(" getTransitionProbability i " + i + " offset " + offset);
+            ArrayList<String> sequenceOfActions = new ArrayList<>();
+            for (ArrayList<String> actions : AgentsActionsG.values()) {
+                sequenceOfActions.addAll(actions);
+            }
+            // System.out.println("sequenceOfActions" + sequenceOfActions);
+            List<String> extractedValues = new ArrayList<>();
+            for (Set<String> values : variablesG.values()) {
+                extractedValues.addAll(values);
+            }
+            String action = sequenceOfActions.get(i);
+            System.out.println("check for action " + action);
+            System.out.println(SelectionTransitionProb);
+            System.out.println(SelectionTransitionProb.get(action));
+            System.out.println(SelectionTransitionProb.get(action).get(offset));
+            double prob = SelectionTransitionProb.get(action).get(offset);
             System.out.println("Offset" + offset + "Transit Probability " + prob);
             return prob;
 
@@ -416,36 +460,53 @@ public class MDPBDI {
          * @param offset Index of the transition within the choice
          */
         public State computeTransitionTarget(int i, int offset) throws PrismException {
-            System.out.println("Compute Transition Target i and offset " + i);
+            System.out.println("Compute Transition Target i  " + i);
             System.out.println("Compute Transition Target offset " + offset);
             System.out.println("valueOfVariable " + valueOfVariable);
             State target = new State(exploreState);
-            int agent = (int) valueOfVariable.get(variablesG.get(0));
-            String tranValue = AgenttransitionValueG.get(agent).get(offset);
-            System.out.println("tranValue " + tranValue);
-            String[] varValue = tranValue.split(",", (variablesG.size() - 1));
-            System.out.println("var value " + Arrays.toString(varValue));
-            System.out.println("current state " + target);
+            System.out.println("target " + target);
+            ArrayList<String> sequenceOfActions = new ArrayList<>();
+            for (ArrayList<String> actions : AgentsActionsG.values()) {
+                sequenceOfActions.addAll(actions);
+            }
+            // System.out.println("sequenceOfActions" + sequenceOfActions);
+            List<String> extractedValues = new ArrayList<>();
+            for (Set<String> values : variablesG.values()) {
+                extractedValues.addAll(values);
+            }
+            String action = sequenceOfActions.get(i);
+            System.out.println("check for action " + action);
+            // System.out.println("check transitionValueG " + transitionValueG);
+            // System.out.println("transitionValueG.get(action) " +
+            // transitionValueG.get(action));
+            // System.out.println("variablesG " + variablesG.get(action).size());
+            // System.out.println("variablesG " + variablesG.get(action));
+            // int agent = (int) valueOfVariable.get(variablesG.get(0));
+            String tranValue = transitionValueG.get(action).get(offset);
+            List<String> var = variablesG.get(action).stream()
+                    .map(s -> Arrays.asList(s.split(",")))
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            String[] varValue = tranValue.split(",", (extractedValues.size()));
+            // System.out.println("var " + var);
+            // System.out.println("var value " + Arrays.toString(varValue));
+            // System.out.println("current state " + target);
             String currentTarget = target.toString().replaceAll("\\(",
                     "").replaceAll("\\)", "");
-            String[] parts = currentTarget.split(",", (variablesG.size() - 1));
-            System.out.println(variablesG.size());
-            Boolean newvalue = false;
-            for (int v = 0; v < varValue.length; v++) {
-                newvalue = Boolean.parseBoolean(varValue[v]);
-            }
-            if ((agent == numberofAgents)) {
-                System.out.println("agent value change to 1");
-                target.setValue(0, 1);
-            } else {
-                System.out.println("Agent avlue change to 2");
-                target.setValue(0, agent + 1);
-            }
+            System.out.println("current state " + currentTarget);
+            String[] parts = currentTarget.split(",");
+            // System.out.println("number of val " + parts.length);
+            // System.out.println("check " + valueOfVariable);
+            // System.out.println("check " + valueOfVariable.size());
+            for (int v = 0; v < var.size(); v++) {
+                // System.out.println("var " + var.get(v));
+                // System.out.println("val " + varValue[v]);
+                // System.out.println(" variblesextractedG " + variblesextractedG);
+                // System.out.println(" variblesextractedG " +
+                // variblesextractedG.indexOf(var.get(v)));
+                Boolean newTotalValue = Boolean.parseBoolean(varValue[v]);
+                target.setValue(variblesextractedG.indexOf(var.get(v)), newTotalValue);
 
-            for (int p = 0; p < parts.length; p++) {
-                System.out.println("valueOfVariable.get(p)" + (valueOfVariable.get(variablesG.get(p))));
-                Boolean newTotalValue = Boolean.parseBoolean(varValue[p]);
-                target.setValue(p, newTotalValue);
             }
             System.out.println("new state " + target);
             return target;
@@ -454,15 +515,20 @@ public class MDPBDI {
 
         @Override
         public boolean isLabelTrue(int i) throws PrismException {
+
+            List<String> extractedValues = new ArrayList<>();
+            for (Set<String> values : variablesG.values()) {
+                extractedValues.addAll(values);
+            }
             switch (i) {
                 // achievement
                 case 0:
 
-                    return (int) valueOfVariable.get(variablesG.get(1)) > 1;
-                // maintain
+                    // return valueOfVariable.get(variablesG.get(1)) > 1;
+                    // maintain
                 case 1:
 
-                    return (int) valueOfVariable.get(variablesG.get(1)) < 2;
+                    // return valueOfVariable.get(variablesG.get(1)) < 2;
 
                 default:
                     throw new PrismException("Label number \"" + i + "\" not defined");
