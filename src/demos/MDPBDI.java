@@ -23,6 +23,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.sound.midi.SysexMessage;
+
 import demos.MDPModelGenerator.GridModel;
 import parser.State;
 import parser.VarList;
@@ -54,6 +56,8 @@ public class MDPBDI {
     public static HashMap<String, ArrayList<String>> transitionValueG = new HashMap<String, ArrayList<String>>();
     static int numberofAgents = 0;
     public static ArrayList<String> variblesextractedG = new ArrayList<String>();
+    public static ArrayList<String> sequenceOfActions = new ArrayList<>();
+    // public static int actionTrack
 
     public static void main(String[] args) throws IOException {
 
@@ -146,10 +150,10 @@ public class MDPBDI {
                 AgenttransitionValue.put(a + 1, Agentmechvalue);
             }
 
-            // System.out.println("numberofAgents" + numberofAgents);
-            // // System.out.println("Agents =" + agents);
+            System.out.println("numberofAgents" + numberofAgents);
+            System.out.println("Agents =" + agents);
             // System.out.println("AgentActions mapping " + AgentsActions);
-            // System.out.println("transitionValue " + transitionValue);
+            System.out.println("transitionValue " + transitionValue);
             // System.out.println("transitionVProb " + transitionProb);
             // System.out.println("Agent transitionValue " + AgenttransitionValue);
             // variables.add(0, "agent");
@@ -202,8 +206,22 @@ public class MDPBDI {
                 variblesextractedG.clear();
             }
             variblesextractedG.addAll(result);
+            // we need to have an extra varible which monior sequence actions to achove a
+            // higher
+            // level goal.
+            variblesextractedG.add(0, "AS");
 
             transitionValueG.putAll(transitionValue);
+
+            // Extract sequential order of actions
+
+            if (!sequenceOfActions.isEmpty()) {
+                sequenceOfActions.clear();
+            }
+
+            for (ArrayList<String> actions : AgentsActionsG.values()) {
+                sequenceOfActions.addAll(actions);
+            }
 
             // // System.out.println("numberofAgents = " + numberofAgents);
             // System.out.println("AgentsNameG " + AgentsNameG);
@@ -237,7 +255,7 @@ public class MDPBDI {
             prism.initialise();
             prism.setEngine(Prism.EXPLICIT);
             // Create a model generator to specify the model that PRISM should build
-            MDPModel modelGen = new MDPModel();
+            MDPModel modelGen = new MDPModel(1);
             // Load the model generator into PRISM,
             // export the model to a dot file (which triggers its construction)
             prism.loadModelGenerator(modelGen);
@@ -249,7 +267,7 @@ public class MDPBDI {
             prism.exportLabelsToFile(null, Prism.EXPORT_PLAIN, new File("ExStates.lab"));
             // Then do some model checking and print the result
             String[] props = new String[] {
-                    "Pmax=?[F \"target\"]"
+                    "Pmax=?[F \"p1\"]"
 
             };
             for (String prop : props) {
@@ -271,9 +289,11 @@ public class MDPBDI {
 
     class MDPModel implements ModelGenerator {
         private State exploreState;
-        HashMap<String, Boolean> valueOfVariable = new HashMap<String, Boolean>();
+        private int maxactions;
+        HashMap<String, Object> valueOfVariable = new HashMap<String, Object>();
 
-        public MDPModel() {
+        public MDPModel(int maxactions) {
+            this.maxactions = maxactions;
         }
 
         @Override
@@ -284,7 +304,6 @@ public class MDPBDI {
 
         @Override
         public List<String> getVarNames() {
-
             System.out.println("getVarNames" + variblesextractedG);
             System.out.println("Total Number of varibles =" + variblesextractedG.size());
 
@@ -296,7 +315,9 @@ public class MDPBDI {
         public List<Type> getVarTypes() {
             List<Type> resultList = new ArrayList<>();
 
-            for (int i = 0; i < variblesextractedG.size(); i++) {
+            resultList.add(TypeInt.getInstance());// monitor the sequence of actions
+
+            for (int i = 1; i < variblesextractedG.size(); i++) {
                 resultList.add(TypeBool.getInstance());
             }
             System.out.println("getVarTypes = " + resultList);
@@ -307,21 +328,29 @@ public class MDPBDI {
         public State getInitialState() throws PrismException {
             System.out.println(" getInitialState ");
             State initialState = new State(variblesextractedG.size());
-            // initialState = initialState.setValue(0, 0);
-            for (int i = 0; i < variblesextractedG.size(); i++) {
+            initialState = initialState.setValue(0, 0);
+            for (int i = 1; i < variblesextractedG.size(); i++) {
                 initialState = initialState.setValue(i, false);
             }
 
             System.out.println("Initial State " + initialState);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
+            System.out.println();
             return initialState;
         }
 
         @Override
         public DeclarationType getVarDeclarationType(int i) throws PrismException {
             Type type = getVarType(i);
-            // System.out.println("getVarDeclarationType value of i = " + i + "
-            // DeclarationBool()" + new DeclarationBool());
-            return new DeclarationBool();
+            System.out.println("getVarDeclarationType value of i = " + i);
+
+            if (i == 0) {
+                return new DeclarationInt(Expression.Int(0), Expression.Int(1));
+
+            } else {
+                return new DeclarationBool();
+            }
+
         }
 
         // There is just one label: "goal"
@@ -329,68 +358,72 @@ public class MDPBDI {
         @Override
         public List<String> getLabelNames() {
             System.out.println("getLabelNames");
-            return Arrays.asList("target");
+            return Arrays.asList("p1");
             // return Arrays.asList("achivement", "maintain");
         }
 
         @Override
         public void exploreState(State exploreState) throws PrismException {
             // Store the state (for reference, and because will clone/copy it later)
-            System.out.println();
-            System.out.println("=============== exploreState================== " + exploreState);
+            System.out.println("exploreState = " + exploreState);
             this.exploreState = exploreState;
-            for (int s = 0; s < variblesextractedG.size(); s++) {
+            valueOfVariable.put(variblesextractedG.get(0), ((Integer) exploreState.varValues[0]).intValue());
+            for (int s = 1; s < variblesextractedG.size(); s++) {
                 valueOfVariable.put(variblesextractedG.get(s), ((Boolean) exploreState.varValues[s]).booleanValue());
 
             }
 
-            // System.out.println("=============== valueOfVariable================== " +
-            // valueOfVariable);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n");
+            System.out.println("=============== valueOfVariable================== " + valueOfVariable);
 
         }
 
         @Override
         public int getNumChoices() throws PrismException {
-            System.out.println("getNumChoices " + 1);
+            System.out.println("getNumChoices ");
             // From sequence of actions like a1,a2 then at a time a1 is alivalble
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
             return 1;
 
         }
 
         @Override
         public int getNumTransitions(int i) throws PrismException {
-            System.out.println("getNumTransitions and value of i = " + i);
-            int transitions = 0;
-            // Extract sequential order of actions
-            ArrayList<String> sequenceOfActions = new ArrayList<>();
-            for (ArrayList<String> actions : AgentsActionsG.values()) {
-                sequenceOfActions.addAll(actions);
-            }
+            System.out.println("...........................................");
+            System.out.println("getNumTransitions  i = " + i);
+
+            // String key = firstEntry.getKey();
+            // Object value = firstEntry.getValue();
+
             // System.out.println("sequenceOfActions" + sequenceOfActions);
             // int agent = (int) valueOfVariable.get(variablesG.get(0));
             // System.out.println("agent = " + agent + " " + AgentsNameG.get(agent - 1));
 
-            for (int a = 0; a < sequenceOfActions.size(); a++) {
-                ArrayList<Double> SelectionExecutionprob = new ArrayList<Double>();
-                String action = sequenceOfActions.get(a);
-                System.out.println("action " + action);
-                transitions = transitionProbG.get(action).size();
-                System.out.println("number of transitions " + transitions);
-                // System.out.println("transitionProbG " + transitionProbG);
-                for (int t = 0; t < transitionProbG.get(action).size(); t++) {
-                    double prob = transitionProbG.get(action).get(t);
-                    System.out.println("execution " + prob);
-                    prob = Double.parseDouble(new DecimalFormat("##.###").format(prob));
-                    // System.out.println("execution " + prob);
-                    SelectionExecutionprob.add(prob);
-                }
+            // for (int a = 0; a < sequenceOfActions.size(); a++) {
+            int transitions = 0;
+            int actionSeqNo = (int) valueOfVariable.get("AS");
+            ArrayList<Double> SelectionExecutionprob = new ArrayList<Double>();
+            String action = sequenceOfActions.get(actionSeqNo);
+            System.out.println("action " + action);
+            // System.out.println("transitionProbG " + transitionProbG);
+            transitions = transitionProbG.get(action).size();
+            System.out.println("number of transitions " + transitions);
 
-                SelectionTransitionProb.put(action, SelectionExecutionprob);
-
+            for (int t = 0; t < transitionProbG.get(action).size(); t++) {
+                double prob = transitionProbG.get(action).get(t);
+                // System.out.println("execution " + prob);
+                prob = Double.parseDouble(new DecimalFormat("##.###").format(prob));
+                // System.out.println("execution " + prob);
+                SelectionExecutionprob.add(prob);
             }
 
-            // System.out.println("number of transitions = " + transitions);
-            // System.out.println("SelectionTransitionProb = " + SelectionTransitionProb);
+            SelectionTransitionProb.put(action, SelectionExecutionprob);
+
+            // }
+
+            System.out.println("return number of transitions = " + transitions);
+            System.out.println("SelectionTransitionProb = " + SelectionTransitionProb);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
             return transitions;
         }
 
@@ -413,16 +446,13 @@ public class MDPBDI {
          */
 
         public Object getTransitionAction(int i, int offset) throws PrismException {
-            System.out.println(" getTransitionAction " + " value of i = " + i + " offset = " + offset);
-            ArrayList<String> sequenceOfActions = new ArrayList<>();
-            for (ArrayList<String> actions : AgentsActionsG.values()) {
-                sequenceOfActions.addAll(actions);
-            }
-            // System.out.println("sequenceOfActions" + sequenceOfActions);
-            //// int agent = (int) valueOfVariable.get(variablesG.get(0));
-            // String action = AgentsNameG.get(agent - 1);
-            String action = sequenceOfActions.get(i);
-            System.out.println("Transit Action  Name " + action);
+            System.out.println("..................................... " + "\n");
+            System.out.println("getTransitionAction i= " + i);
+            System.out.println("getTransitionAction offset= " + offset);
+            int actionSeqNo = (int) valueOfVariable.get("AS");
+            String action = sequenceOfActions.get(actionSeqNo);
+            System.out.println("Transit Action " + action);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
             return action;
 
         }
@@ -430,23 +460,17 @@ public class MDPBDI {
         @Override
         public Double getTransitionProbability(int i, int offset) throws PrismException {
             // int agent = (int) valueOfVariable.get(variablesG.get(0));
-            System.out.println(" getTransitionProbability i " + i + " offset " + offset);
-            ArrayList<String> sequenceOfActions = new ArrayList<>();
-            for (ArrayList<String> actions : AgentsActionsG.values()) {
-                sequenceOfActions.addAll(actions);
-            }
-            // System.out.println("sequenceOfActions" + sequenceOfActions);
-            List<String> extractedValues = new ArrayList<>();
-            for (Set<String> values : variablesG.values()) {
-                extractedValues.addAll(values);
-            }
-            String action = sequenceOfActions.get(i);
+            System.out.println("getTransitionProbability i= " + i);
+            System.out.println("getTransitionProbability offset= " + offset);
+            int actionSeqNo = (int) valueOfVariable.get("AS");
+            String action = sequenceOfActions.get(actionSeqNo);
             // System.out.println("check for action " + action);
             // System.out.println(SelectionTransitionProb);
             // System.out.println(SelectionTransitionProb.get(action));
             // System.out.println(SelectionTransitionProb.get(action).get(offset));
             double prob = SelectionTransitionProb.get(action).get(offset);
-            System.out.println("Offset " + offset + " Transit Probability " + prob);
+            System.out.println("Transit Probability = " + prob);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
             return prob;
 
         }
@@ -460,22 +484,20 @@ public class MDPBDI {
          * @param offset Index of the transition within the choice
          */
         public State computeTransitionTarget(int i, int offset) throws PrismException {
-            System.out.println("Compute Transition Target i  " + i);
-            System.out.println("Compute Transition Target offset " + offset);
-            // System.out.println("valueOfVariable " + valueOfVariable);
+            System.out.println(".........................................." + "\n");
+            System.out.println("computeTransitionTarget i= " + i);
+            System.out.println("computeTransitionTarget offset= " + offset);
+            System.out.println("valueOfVariable " + valueOfVariable);
+            int actionSeqNo = (int) valueOfVariable.get("AS");
             State target = new State(exploreState);
-            System.out.println("target " + target);
-            ArrayList<String> sequenceOfActions = new ArrayList<>();
-            for (ArrayList<String> actions : AgentsActionsG.values()) {
-                sequenceOfActions.addAll(actions);
-            }
+
             // System.out.println("sequenceOfActions" + sequenceOfActions);
             List<String> extractedValues = new ArrayList<>();
             for (Set<String> values : variablesG.values()) {
                 extractedValues.addAll(values);
             }
-            String action = sequenceOfActions.get(i);
-            // System.out.println("check for action " + action);
+            String action = sequenceOfActions.get(actionSeqNo);
+            System.out.println("check for action " + action);
             // System.out.println("check transitionValueG " + transitionValueG);
             // System.out.println("transitionValueG.get(action) " +
             // transitionValueG.get(action));
@@ -488,17 +510,24 @@ public class MDPBDI {
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
             String[] varValue = tranValue.split(",", (extractedValues.size()));
-            // System.out.println("var " + var);
+            // System.out.println("var list " + var);
             // System.out.println("var value " + Arrays.toString(varValue));
             // System.out.println("current state " + target);
             String currentTarget = target.toString().replaceAll("\\(",
                     "").replaceAll("\\)", "");
-            System.out.println("current state " + currentTarget);
+            System.out.println("current state = " + currentTarget);
             String[] parts = currentTarget.split(",");
             // System.out.println("number of val " + parts.length);
             // System.out.println("check " + valueOfVariable);
             // System.out.println("check " + valueOfVariable.size());
+            if (actionSeqNo < sequenceOfActions.size() - 1) {
+                System.out.println("sequenceOfActions.size() " + sequenceOfActions.size());
+                target.setValue(0, actionSeqNo + 1);
+            }
+
             for (int v = 0; v < var.size(); v++) {
+                // System.out.println("check " + var);
+                // System.out.println("check v " + v);
                 // System.out.println("var " + var.get(v));
                 // System.out.println("val " + varValue[v]);
                 // System.out.println(" variblesextractedG " + variblesextractedG);
@@ -508,7 +537,8 @@ public class MDPBDI {
                 target.setValue(variblesextractedG.indexOf(var.get(v)), newTotalValue);
 
             }
-            System.out.println("new state " + target);
+            System.out.println("new state= " + target);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
             return target;
 
         }
