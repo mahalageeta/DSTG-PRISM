@@ -291,8 +291,9 @@ public class MDPBDI1 {
     class MDPModel implements ModelGenerator {
         private State exploreState;
         private int maxactions;
-        public static int actionSeqNo = 1;
         HashMap<String, Object> valueOfVariable = new HashMap<String, Object>();
+        private Map<State, Integer> stateToActionIndexMap = new HashMap<>();
+        // Track the action index for each state
 
         public MDPModel(int maxactions) {
             this.maxactions = maxactions;
@@ -300,6 +301,7 @@ public class MDPBDI1 {
 
         @Override
         public ModelType getModelType() {
+            System.out.println("maxactions " + maxactions);
             System.out.println("getModelType = " + ModelType.MDP);
             return ModelType.MDP;
         }
@@ -363,18 +365,19 @@ public class MDPBDI1 {
         public void exploreState(State exploreState) throws PrismException {
             // Store the state (for reference, and because will clone/copy it later)
             System.out.println(".................EXPLORE.........................." + "\n");
-            if (actionSeqNo <= sequenceOfActions.size()) {
-                String action = sequenceOfActions.get(actionSeqNo - 1);
-                System.out.println("Exploring state for action " + action);
-                this.exploreState = exploreState;
-                for (int s = 0; s < variblesextractedG.size(); s++) {
-                    valueOfVariable.put(variblesextractedG.get(s),
-                            ((Boolean) exploreState.varValues[s]).booleanValue());
-                }
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n");
-            } else {
-                System.out.println("End of sequence reached.");
+            this.exploreState = exploreState;
+            int currentActionIndex = stateToActionIndexMap.getOrDefault(exploreState, 0);
+            System.out.println("currentActionIndex " + currentActionIndex);
+            System.out.println("stateToActionIndexMap " + stateToActionIndexMap);
+            stateToActionIndexMap.put(exploreState, currentActionIndex + 1);
+            System.out.println("After Update stateToActionIndexMap " + stateToActionIndexMap);
+            System.out.println("exploreState " + exploreState);
+            for (int s = 0; s < variblesextractedG.size(); s++) {
+                valueOfVariable.put(variblesextractedG.get(s),
+                        ((Boolean) exploreState.varValues[s]).booleanValue());
             }
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n");
+
         }
 
         @Override
@@ -383,7 +386,16 @@ public class MDPBDI1 {
             System.out.println("getNumChoices ");
             // From sequence of actions like a1,a2 then at a time a1 is alivalble
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
-            return 1;
+            State currentState = exploreState;
+            int currentActionIndex = stateToActionIndexMap.getOrDefault(currentState, 0);
+            int remainingActions = sequenceOfActions.size() - currentActionIndex;
+            if (remainingActions > 0) {
+                System.out.println("Remaining actions: " + remainingActions);
+                return 1; // Only one choice available at a time
+            } else {
+                System.out.println("No more actions to execute.");
+                return 0; // No choices available, execution is complete
+            }
 
         }
 
@@ -391,16 +403,16 @@ public class MDPBDI1 {
         public int getNumTransitions(int i) throws PrismException {
             System.out.println("..........................................." + "\n");
             System.out.println("getNumTransitions  i = " + i);
+            State currentState = exploreState;
+            int currentActionIndex = stateToActionIndexMap.getOrDefault(currentState, 0);
+            int remainingActions = sequenceOfActions.size() - currentActionIndex;
             ArrayList<Double> SelectionExecutionprob = new ArrayList<Double>();
-            System.out.println("actionSeqNo " + actionSeqNo);
-            System.out.println("sequenceOfActions.size() " + sequenceOfActions.size());
-
-            if (actionSeqNo <= sequenceOfActions.size()) {
-                int transitions = 0;
-                String action = sequenceOfActions.get(actionSeqNo - 1);
-                // System.out.println("action " + action);
+            int transitions = 0;
+            // int remainingActions = sequenceOfActions.size() - (executedActions - 1);
+            if (remainingActions > 0) {
+                String action = sequenceOfActions.get(currentActionIndex - 1);
+                System.out.println("action " + action);
                 transitions = transitionProbG.get(action).size();
-                // System.out.println("number of transitions " + transitions);
                 for (int t = 0; t < transitionProbG.get(action).size(); t++) {
                     double prob = transitionProbG.get(action).get(t);
                     prob = Double.parseDouble(new DecimalFormat("##.###").format(prob));
@@ -413,9 +425,11 @@ public class MDPBDI1 {
                 System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
                 return transitions;
 
+            } else {
+                // No more actions to execute
+                System.out.println("No more actions to execute");
+                return 0;
             }
-            System.out.println("Never Happen Transitions = " + 0);
-            return 0;
 
         }
 
@@ -440,19 +454,14 @@ public class MDPBDI1 {
         public Object getTransitionAction(int i, int offset) throws PrismException {
             System.out.println("..................................... " + "\n");
             System.out.println("getTransitionAction i= " + i);
+            State currentState = exploreState;
+            int currentActionIndex = stateToActionIndexMap.getOrDefault(currentState, 0);
+            int remainingActions = sequenceOfActions.size() - currentActionIndex;
+            String action = sequenceOfActions.get(currentActionIndex - 1);
+            System.out.println("Transit Action " + action);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+            return action;
 
-            if (actionSeqNo <= sequenceOfActions.size()) {
-                // System.out.println("==== " + actionSeqNo);
-                String action = sequenceOfActions.get(actionSeqNo - 1);
-                System.out.println("Transit Action " + action);
-                System.out.println("actionSeqNo before" + actionSeqNo);
-                actionSeqNo++;
-                System.out.println("actionSeqNo after" + actionSeqNo);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
-                return action;
-            }
-
-            return null;
         }
 
         @Override
@@ -460,7 +469,11 @@ public class MDPBDI1 {
             System.out.println(".........................................." + "\n");
             System.out.println("getTransitionProbability i= " + i);
             System.out.println("getTransitionProbability offset= " + offset);
-            String action = sequenceOfActions.get(actionSeqNo - 1);
+            State currentState = exploreState;
+            int currentActionIndex = stateToActionIndexMap.getOrDefault(currentState, 0);
+            int remainingActions = sequenceOfActions.size() - currentActionIndex;
+
+            String action = sequenceOfActions.get(currentActionIndex - 1);
             double prob = SelectionTransitionProb.get(action).get(offset);
             System.out.println("Transit Probability = " + prob);
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -486,35 +499,29 @@ public class MDPBDI1 {
             for (Set<String> values : variablesG.values()) {
                 extractedValues.addAll(values);
             }
-            String action = sequenceOfActions.get(actionSeqNo - 1);
-            // System.out.println("check for action " + action);
-            // System.out.println("actionSeqNo " + actionSeqNo);
-            // System.out.println("sequenceOfActions.size() " + sequenceOfActions.size());
-            if (actionSeqNo <= sequenceOfActions.size()) {
-                // System.out.println("actionSeqNo <= sequenceOfActions.size()");
-                String tranValue = transitionValueG.get(action).get(offset);
-                List<String> var = variablesG.get(action).stream()
-                        .map(s -> Arrays.asList(s.split(",")))
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList());
-                String[] varValue = tranValue.split(",", (extractedValues.size()));
-                String currentTarget = target.toString().replaceAll("\\(",
-                        "").replaceAll("\\)", "");
-                System.out.println("current state = " + currentTarget);
-                String[] parts = currentTarget.split(",");
-                for (int v = 0; v < var.size(); v++) {
-                    Boolean newTotalValue = Boolean.parseBoolean(varValue[v]);
-                    target.setValue(variblesextractedG.indexOf(var.get(v)), newTotalValue);
+            State currentState = exploreState;
+            int currentActionIndex = stateToActionIndexMap.getOrDefault(currentState, 0);
+            int remainingActions = sequenceOfActions.size() - currentActionIndex;
+            String action = sequenceOfActions.get(currentActionIndex - 1);
+            String tranValue = transitionValueG.get(action).get(offset);
+            List<String> var = variablesG.get(action).stream()
+                    .map(s -> Arrays.asList(s.split(",")))
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            String[] varValue = tranValue.split(",", (extractedValues.size()));
+            String currentTarget = target.toString().replaceAll("\\(",
+                    "").replaceAll("\\)", "");
+            System.out.println("current state = " + currentTarget);
+            String[] parts = currentTarget.split(",");
+            for (int v = 0; v < var.size(); v++) {
+                Boolean newTotalValue = Boolean.parseBoolean(varValue[v]);
+                target.setValue(variblesextractedG.indexOf(var.get(v)), newTotalValue);
 
-                }
-                // target.setValue(0, actionSeqNo + 1);
-
-                System.out.println("new state= " + target);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
-                return target;
             }
+            // target.setValue(0, actionSeqNo + 1);
 
-            System.out.println("Never Happen");
+            System.out.println("new state= " + target);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
             return target;
 
         }

@@ -291,6 +291,7 @@ public class MDPBDI {
         private State exploreState;
         private int maxactions;
         HashMap<String, Object> valueOfVariable = new HashMap<String, Object>();
+        private Map<State, String> stateToActionIndexMap = new HashMap<>();
 
         public MDPModel(int maxactions) {
             this.maxactions = maxactions;
@@ -336,6 +337,7 @@ public class MDPBDI {
             System.out.println("Initial State " + initialState);
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
             System.out.println();
+            stateToActionIndexMap.put(initialState, null);
             return initialState;
         }
 
@@ -366,6 +368,7 @@ public class MDPBDI {
         public void exploreState(State exploreState) throws PrismException {
             // Store the state (for reference, and because will clone/copy it later)
             System.out.println(".................EXPLORE.........................." + "\n");
+            // System.out.println(" stateToActionIndexMap " + stateToActionIndexMap);
             System.out.println("check " + ((Integer) exploreState.varValues[0]).intValue());
             // if (((Integer) exploreState.varValues[0]).intValue() <=
             // sequenceOfActions.size()) {
@@ -515,11 +518,30 @@ public class MDPBDI {
                     target.setValue(variblesextractedG.indexOf(var.get(v)), newTotalValue);
 
                 }
-                target.setValue(0, actionSeqNo + 1);
+                System.out.println("new state except first " + target);
+                for (Map.Entry<State, String> entry : stateToActionIndexMap.entrySet()) {
+                    State key = entry.getKey();
+                    System.out.println("here " + key.toString().substring(1, 2));
+                    if (key.toString().substring(2).equals(target.toString().substring(2))) {
+                        System.out.println("+++++++++  setting value here ++++++++++++++++");
 
-                System.out.println("new state= " + target);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
-                return target;
+                        int actionindex = Integer.parseInt(key.toString().substring(1, 2));
+                        target.setValue(0, actionindex);
+                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+                        stateToActionIndexMap.put(target, action);
+                        System.out.println(" Return state matching= " + target);
+                        return target;
+
+                    } else {
+                        target.setValue(0, actionSeqNo + 1);
+                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+                        stateToActionIndexMap.put(target, action);
+                        System.out.println(" Return state else = " + target);
+                        return target;
+                    }
+
+                }
+
             }
 
             System.out.println("Never Happen");
