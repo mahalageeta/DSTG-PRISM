@@ -46,7 +46,7 @@ import prism.PrismFileLog;
 import prism.PrismLangException;
 import prism.PrismLog;
 
-public class MDPBDI {
+public class MDPBDI1 {
     public static HashMap<Integer, ArrayList<String>> AgenttransitionValueG = new HashMap<Integer, ArrayList<String>>();
     public static HashMap<String, ArrayList<Double>> SelectionTransitionProb = new HashMap<String, ArrayList<Double>>();
     public static HashMap<String, ArrayList<Double>> transitionProbG = new HashMap<String, ArrayList<Double>>();
@@ -57,6 +57,7 @@ public class MDPBDI {
     static int numberofAgents = 0;
     public static ArrayList<String> variblesextractedG = new ArrayList<String>();
     public static ArrayList<String> sequenceOfActions = new ArrayList<>();
+
     // public static int actionTrack
 
     public static void main(String[] args) throws IOException {
@@ -209,7 +210,7 @@ public class MDPBDI {
             // we need to have an extra varible which monior sequence actions to achove a
             // higher
             // level goal.
-            variblesextractedG.add(0, "AS");
+            // variblesextractedG.add(0, "AS");
 
             transitionValueG.putAll(transitionValue);
 
@@ -233,7 +234,7 @@ public class MDPBDI {
             // System.out.println("AgenttransitionValueG " + AgenttransitionValueG);
 
             Instant start = Instant.now();
-            new MDPBDI().run();
+            new MDPBDI1().run();
 
             Instant end = Instant.now();
             Duration timeElapsed = Duration.between(start, end);
@@ -290,6 +291,7 @@ public class MDPBDI {
     class MDPModel implements ModelGenerator {
         private State exploreState;
         private int maxactions;
+        public static int actionSeqNo = 1;
         HashMap<String, Object> valueOfVariable = new HashMap<String, Object>();
 
         public MDPModel(int maxactions) {
@@ -304,7 +306,7 @@ public class MDPBDI {
 
         @Override
         public List<String> getVarNames() {
-            // System.out.println("getVarNames" + variblesextractedG);
+            System.out.println("getVarNames" + variblesextractedG);
             // System.out.println("Total Number of varibles =" + variblesextractedG.size());
 
             return variblesextractedG;
@@ -315,12 +317,12 @@ public class MDPBDI {
         public List<Type> getVarTypes() {
             List<Type> resultList = new ArrayList<>();
 
-            resultList.add(TypeInt.getInstance());// monitor the sequence of actions
+            // resultList.add(TypeInt.getInstance());// monitor the sequence of actions
 
-            for (int i = 1; i < variblesextractedG.size(); i++) {
+            for (int i = 0; i < variblesextractedG.size(); i++) {
                 resultList.add(TypeBool.getInstance());
             }
-            // System.out.println("getVarTypes = " + resultList);
+            System.out.println("getVarTypes = " + resultList);
             return resultList;
         }
 
@@ -328,8 +330,8 @@ public class MDPBDI {
         public State getInitialState() throws PrismException {
             System.out.println(" getInitialState ");
             State initialState = new State(variblesextractedG.size());
-            initialState = initialState.setValue(0, 1);
-            for (int i = 1; i < variblesextractedG.size(); i++) {
+            // initialState = initialState.setValue(0, 1);
+            for (int i = 0; i < variblesextractedG.size(); i++) {
                 initialState = initialState.setValue(i, false);
             }
 
@@ -342,14 +344,9 @@ public class MDPBDI {
         @Override
         public DeclarationType getVarDeclarationType(int i) throws PrismException {
             Type type = getVarType(i);
-            // System.out.println("getVarDeclarationType value of i = " + i);
+            System.out.println("getVarDeclarationType value of i = " + i);
 
-            if (i == 0) {
-                return new DeclarationInt(Expression.Int(1), Expression.Int(sequenceOfActions.size()));
-
-            } else {
-                return new DeclarationBool();
-            }
+            return new DeclarationBool();
 
         }
 
@@ -366,21 +363,18 @@ public class MDPBDI {
         public void exploreState(State exploreState) throws PrismException {
             // Store the state (for reference, and because will clone/copy it later)
             System.out.println(".................EXPLORE.........................." + "\n");
-            System.out.println("check " + ((Integer) exploreState.varValues[0]).intValue());
-            // if (((Integer) exploreState.varValues[0]).intValue() <=
-            // sequenceOfActions.size()) {
-            System.out.println("exploreState = " + exploreState);
-            this.exploreState = exploreState;
-            valueOfVariable.put(variblesextractedG.get(0), ((Integer) exploreState.varValues[0]).intValue());
-            for (int s = 1; s < variblesextractedG.size(); s++) {
-                valueOfVariable.put(variblesextractedG.get(s),
-                        ((Boolean) exploreState.varValues[s]).booleanValue());
+            if (actionSeqNo <= sequenceOfActions.size()) {
+                String action = sequenceOfActions.get(actionSeqNo - 1);
+                System.out.println("Exploring state for action " + action);
+                this.exploreState = exploreState;
+                for (int s = 0; s < variblesextractedG.size(); s++) {
+                    valueOfVariable.put(variblesextractedG.get(s),
+                            ((Boolean) exploreState.varValues[s]).booleanValue());
+                }
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n");
+            } else {
+                System.out.println("End of sequence reached.");
             }
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n");
-            // System.out.println("valueOfVariable" + valueOfVariable);
-
-            // }
-
         }
 
         @Override
@@ -398,10 +392,8 @@ public class MDPBDI {
             System.out.println("..........................................." + "\n");
             System.out.println("getNumTransitions  i = " + i);
             ArrayList<Double> SelectionExecutionprob = new ArrayList<Double>();
-            int actionSeqNo = (int) valueOfVariable.get("AS");
             System.out.println("actionSeqNo " + actionSeqNo);
             System.out.println("sequenceOfActions.size() " + sequenceOfActions.size());
-            System.out.println("check " + ((Integer) exploreState.varValues[0]).intValue());
 
             if (actionSeqNo <= sequenceOfActions.size()) {
                 int transitions = 0;
@@ -448,12 +440,14 @@ public class MDPBDI {
         public Object getTransitionAction(int i, int offset) throws PrismException {
             System.out.println("..................................... " + "\n");
             System.out.println("getTransitionAction i= " + i);
-            System.out.println("getTransitionAction offset= " + offset);
-            int actionSeqNo = (int) valueOfVariable.get("AS");
+
             if (actionSeqNo <= sequenceOfActions.size()) {
                 // System.out.println("==== " + actionSeqNo);
                 String action = sequenceOfActions.get(actionSeqNo - 1);
                 System.out.println("Transit Action " + action);
+                System.out.println("actionSeqNo before" + actionSeqNo);
+                actionSeqNo++;
+                System.out.println("actionSeqNo after" + actionSeqNo);
                 System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
                 return action;
             }
@@ -466,7 +460,6 @@ public class MDPBDI {
             System.out.println(".........................................." + "\n");
             System.out.println("getTransitionProbability i= " + i);
             System.out.println("getTransitionProbability offset= " + offset);
-            int actionSeqNo = (int) valueOfVariable.get("AS");
             String action = sequenceOfActions.get(actionSeqNo - 1);
             double prob = SelectionTransitionProb.get(action).get(offset);
             System.out.println("Transit Probability = " + prob);
@@ -488,7 +481,6 @@ public class MDPBDI {
             System.out.println("computeTransitionTarget i= " + i);
             System.out.println("computeTransitionTarget offset= " + offset);
             System.out.println("valueOfVariable " + valueOfVariable);
-            int actionSeqNo = (int) valueOfVariable.get("AS");
             State target = new State(exploreState);
             List<String> extractedValues = new ArrayList<>();
             for (Set<String> values : variablesG.values()) {
@@ -515,7 +507,7 @@ public class MDPBDI {
                     target.setValue(variblesextractedG.indexOf(var.get(v)), newTotalValue);
 
                 }
-                target.setValue(0, actionSeqNo + 1);
+                // target.setValue(0, actionSeqNo + 1);
 
                 System.out.println("new state= " + target);
                 System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
