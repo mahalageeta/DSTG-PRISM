@@ -1,7 +1,9 @@
 package demos;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,6 +35,8 @@ import parser.ast.DeclarationBool;
 import parser.ast.DeclarationInt;
 import parser.ast.DeclarationType;
 import parser.ast.Expression;
+import parser.ast.ModulesFile;
+import parser.ast.PropertiesFile;
 import parser.type.Type;
 import parser.type.TypeBool;
 import parser.type.TypeInt;
@@ -45,6 +49,7 @@ import prism.PrismException;
 import prism.PrismFileLog;
 import prism.PrismLangException;
 import prism.PrismLog;
+import prism.Result;
 
 public class MDPBDI {
     public static HashMap<Integer, ArrayList<String>> AgenttransitionValueG = new HashMap<Integer, ArrayList<String>>();
@@ -266,14 +271,48 @@ public class MDPBDI {
             prism.exportStatesToFile(Prism.EXPORT_PLAIN, new File("ExStates.sta"));
             prism.exportLabelsToFile(null, Prism.EXPORT_PLAIN, new File("ExStates.lab"));
             // Then do some model checking and print the result
-            String[] props = new String[] {
-                    "Pmax=?[F \"p1\"]"
 
-            };
-            for (String prop : props) {
-                System.out.println(prop + ":");
-                System.out.println(prism.modelCheck(prop).getResult());
+            // Parse and load a properties model for the model
+            // ModulesFile modulesFile = prism.parseModelFile(new File("examples/dice.pm"));
+            PropertiesFile propertiesFile = prism.parsePropertiesFile(new File("src\\demos\\re.pctl"));
+            // Model check the first property from the file
+            // System.out.println(propertiesFile.getPropertyObject(0));
+            // Result result = prism.modelCheck(propertiesFile,
+            // propertiesFile.getPropertyObject(0));
+            // System.out.println(result.getResult());
+
+            System.out.println("propertiesFile " + propertiesFile.getNumProperties());
+            Map<Integer, String> resultMap = new HashMap<>();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"))) {
+                for (int req = 0; req < propertiesFile.getNumProperties(); req++) {
+                    System.out.println();
+                    System.out.println(" Goal = " + propertiesFile.getPropertyObject(req));
+                    Result result = prism.modelCheck(propertiesFile, propertiesFile.getPropertyObject(req));
+                    double resultValue = (Double) result.getResult();
+                    String resultString = String.valueOf(resultValue); // Convert double to String
+                    System.out.println(resultString);
+
+                    // Save to file
+                    writer.write("req: " + req + ", result: " + resultString);
+                    writer.newLine();
+
+                    // Save to map
+                    resultMap.put(req, resultString);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            System.out.println("resultMap = " + resultMap);
+
+            // for (int req = 0; req < propertiesFile.getNumProperties(); req++) {
+            // System.out.println();
+            // System.out.println(" Goal = " + propertiesFile.getPropertyObject(req));
+            // Result result = prism.modelCheck(propertiesFile,
+            // propertiesFile.getPropertyObject(req));
+            // System.out.println(result.getResult());
+
+            // }
 
             // Close down PRISM
             prism.closeDown();
@@ -360,7 +399,8 @@ public class MDPBDI {
         @Override
         public List<String> getLabelNames() {
             System.out.println("getLabelNames");
-            return Arrays.asList("p1");
+
+            return Arrays.asList("goal1");
             // return Arrays.asList("achivement", "maintain");
         }
 
@@ -368,22 +408,15 @@ public class MDPBDI {
         public void exploreState(State exploreState) throws PrismException {
             // Store the state (for reference, and because will clone/copy it later)
             System.out.println(".................EXPLORE.........................." + "\n");
-            // System.out.println(" stateToActionIndexMap " + stateToActionIndexMap);
-            System.out.println("check " + ((Integer) exploreState.varValues[0]).intValue());
-            // if (((Integer) exploreState.varValues[0]).intValue() <=
-            // sequenceOfActions.size()) {
-            System.out.println("exploreState = " + exploreState);
             this.exploreState = exploreState;
+            System.out.println("exploreState = " + exploreState);
+            System.out.println("Value of current action" + ((Integer) exploreState.varValues[0]).intValue());
             valueOfVariable.put(variblesextractedG.get(0), ((Integer) exploreState.varValues[0]).intValue());
             for (int s = 1; s < variblesextractedG.size(); s++) {
                 valueOfVariable.put(variblesextractedG.get(s),
                         ((Boolean) exploreState.varValues[s]).booleanValue());
             }
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n");
-            // System.out.println("valueOfVariable" + valueOfVariable);
-
-            // }
-
         }
 
         @Override
@@ -404,14 +437,11 @@ public class MDPBDI {
             int actionSeqNo = (int) valueOfVariable.get("AS");
             System.out.println("actionSeqNo " + actionSeqNo);
             System.out.println("sequenceOfActions.size() " + sequenceOfActions.size());
-            System.out.println("check " + ((Integer) exploreState.varValues[0]).intValue());
-
+            System.out.println("Action index " + ((Integer) exploreState.varValues[0]).intValue());
             if (actionSeqNo <= sequenceOfActions.size()) {
                 int transitions = 0;
                 String action = sequenceOfActions.get(actionSeqNo - 1);
-                // System.out.println("action " + action);
                 transitions = transitionProbG.get(action).size();
-                // System.out.println("number of transitions " + transitions);
                 for (int t = 0; t < transitionProbG.get(action).size(); t++) {
                     double prob = transitionProbG.get(action).get(t);
                     prob = Double.parseDouble(new DecimalFormat("##.###").format(prob));
@@ -498,11 +528,7 @@ public class MDPBDI {
                 extractedValues.addAll(values);
             }
             String action = sequenceOfActions.get(actionSeqNo - 1);
-            // System.out.println("check for action " + action);
-            // System.out.println("actionSeqNo " + actionSeqNo);
-            // System.out.println("sequenceOfActions.size() " + sequenceOfActions.size());
             if (actionSeqNo <= sequenceOfActions.size()) {
-                // System.out.println("actionSeqNo <= sequenceOfActions.size()");
                 String tranValue = transitionValueG.get(action).get(offset);
                 List<String> var = variablesG.get(action).stream()
                         .map(s -> Arrays.asList(s.split(",")))
@@ -519,26 +545,32 @@ public class MDPBDI {
 
                 }
                 System.out.println("new state except first " + target);
+                Boolean match = false;
+                State matchedState = null;
                 for (Map.Entry<State, String> entry : stateToActionIndexMap.entrySet()) {
+                    System.out.println("checkimg loop states");
                     State key = entry.getKey();
-                    System.out.println("here " + key.toString().substring(1, 2));
+                    System.out.println("current state in the set of states " + key);
+                    System.out.println("value of action index " + key.toString().substring(1, 2));
                     if (key.toString().substring(2).equals(target.toString().substring(2))) {
-                        System.out.println("+++++++++  setting value here ++++++++++++++++");
+                        match = true;
+                        System.out.println("matched " + target);
+                        matchedState = target;
+                        break;
 
-                        int actionindex = Integer.parseInt(key.toString().substring(1, 2));
-                        target.setValue(0, actionindex);
-                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
-                        stateToActionIndexMap.put(target, action);
-                        System.out.println(" Return state matching= " + target);
-                        return target;
-
-                    } else {
-                        target.setValue(0, actionSeqNo + 1);
-                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
-                        stateToActionIndexMap.put(target, action);
-                        System.out.println(" Return state else = " + target);
-                        return target;
                     }
+
+                }
+
+                if (match) {
+                    System.out.println("++++++++++++++++++ matched +++++++++++++++++++");
+                    System.out.println(" matchedState " + matchedState);
+                    // stateToActionIndexMap.put(matchedState, action);
+                    return matchedState;
+                } else {
+                    target.setValue(0, actionSeqNo + 1);
+                    stateToActionIndexMap.put(target, action);
+                    return target;
 
                 }
 
@@ -558,7 +590,8 @@ public class MDPBDI {
             switch (i) {
                 case 0:
                     // "target" (top-right corner)
-                    return "p1".equals("true") && "p2".equals("true");
+                    // label "safe" = temp<=100 | alarm=true;
+                    return "p1".equals("true");
                 default:
                     throw new PrismException("Label number \"" + i + "\" not defined");
             }
