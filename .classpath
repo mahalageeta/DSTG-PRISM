@@ -14,6 +14,7 @@
 	<classpathentry kind="lib" path="D:/GitHub/prism/prism/lib/lpsolve55j.jar"/>
 	<classpathentry kind="lib" path="D:/GitHub/prism/prism/lib/jas.jar"/>
 	<classpathentry kind="lib" path="D:/GitHub/prism/prism/lib/nailgun-server.jar"/>
+	<classpathentry kind="lib" path="D:/GitHub/prism/prism/prism/lib/log4j.jar"/>
 	<classpathentry kind="lib" path="D:/GitHub/prism/prism/prism/lib/log4j-api.jar"/>
 	<classpathentry kind="lib" path="D:/GitHub/prism/prism/prism/lib/log4j-core.jar"/>
 </classpath>
