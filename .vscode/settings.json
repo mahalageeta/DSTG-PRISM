@@ -1,19 +1,19 @@
 {
     "java.project.referencedLibraries": [
-        "D:/GitHub/prism/prism/lib/colt.jar",
-        "D:/GitHub/prism/prism/lib/epsgraphics.jar",
-        "D:/GitHub/prism/prism/lib/jcommon.jar",
-        "D:/GitHub/prism/prism/lib/jfreechart.jar",
-        "D:/GitHub/prism/prism/lib/jhoafparser.jar",
-        "D:/GitHub/prism/prism/lib/colt.jar",
-        "D:/GitHub/prism/prism/lib/pepa.zip",
-        "D:/GitHub/prism/prism/lib/lpsolve55j.jar",
-        "D:/GitHub/prism/prism/lib/jas.jar",
-        "D:/GitHub/prism/prism/lib/nailgun-server.jar",
-        "D:/GitHub/prism/prism/prism/lib/log4j.jar",
-        "D:/GitHub/prism/prism/prism/lib/log4j-api.jar",
-        "D:/GitHub/prism/prism/prism/lib/log4j-core.jar"
-         //"D:/GitHub/prism/prism/lib/*.jar",
+        // "D:/GitHub/prism/prism/lib/colt.jar",
+        // "D:/GitHub/prism/prism/lib/epsgraphics.jar",
+        // "D:/GitHub/prism/prism/lib/jcommon.jar",
+        // "D:/GitHub/prism/prism/lib/jfreechart.jar",
+        // "D:/GitHub/prism/prism/lib/jhoafparser.jar",
+        // "D:/GitHub/prism/prism/lib/colt.jar",
+        // "D:/GitHub/prism/prism/lib/pepa.zip",
+        // "D:/GitHub/prism/prism/lib/lpsolve55j.jar",
+        // "D:/GitHub/prism/prism/lib/jas.jar",
+        // "D:/GitHub/prism/prism/lib/nailgun-server.jar",
+        // "D:/GitHub/prism/prism/prism/lib/log4j.jar",
+        // "D:/GitHub/prism/prism/prism/lib/log4j-api.jar",
+        // "D:/GitHub/prism/prism/prism/lib/log4j-core.jar"
+         "D:/GitHub/prism/prism/lib/*.jar"
     ],
     "java.debug.settings.onBuildFailureProceed": true,
     //"java.project.outputPath": "/home/gm168/prism/prism/prism/classes",
