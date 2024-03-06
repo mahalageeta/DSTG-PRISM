@@ -254,7 +254,9 @@ public class MDPBDI {
 
         try {
             // Create a log for PRISM output (hidden or stdout)
-            PrismLog mainLog = new PrismFileLog("stdout");
+            // PrismLog mainLog = new PrismFileLog("stdout");
+            PrismLog mainLog = new PrismDevNullLog();
+
             // Initialise PRISM engine
             Prism prism = new Prism(mainLog);
             prism.initialise();

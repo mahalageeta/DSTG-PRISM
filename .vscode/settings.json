@@ -1,6 +1,7 @@
 {
     "java.project.referencedLibraries": [
-        "D:/GitHub/prism/prism/lib/*.jar"
+        "D:/GitHub/prism/prism/lib/*.jar",
+        "D:/GitHub/prism/prism/lib/colt.jar"
     ],
     "java.debug.settings.onBuildFailureProceed": true,
     //"java.project.outputPath": "/home/gm168/prism/prism/prism/classes",
