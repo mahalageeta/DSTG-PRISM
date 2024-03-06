@@ -282,22 +282,22 @@ public class MDPBDI {
             // System.out.println(result.getResult());
 
             System.out.println("propertiesFile " + propertiesFile.getNumProperties());
-            Map<Integer, String> resultMap = new HashMap<>();
+            Map<String, String> resultMap = new HashMap<>();
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"))) {
                 for (int req = 0; req < propertiesFile.getNumProperties(); req++) {
-                    System.out.println();
-                    System.out.println(" Goal = " + propertiesFile.getPropertyObject(req));
+                    // System.out.println();
+                    // System.out.println(" Goal = " + propertiesFile.getPropertyObject(req));
                     Result result = prism.modelCheck(propertiesFile, propertiesFile.getPropertyObject(req));
                     double resultValue = (Double) result.getResult();
                     String resultString = String.valueOf(resultValue); // Convert double to String
-                    System.out.println(resultString);
+                    // System.out.println(resultString);
 
                     // Save to file
-                    writer.write("req: " + req + ", result: " + resultString);
+                    writer.write("goal: " + (req + 1) + ", result: " + resultString);
                     writer.newLine();
 
                     // Save to map
-                    resultMap.put(req, resultString);
+                    resultMap.put("goal" + (req + 1), resultString);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -1,3 +1,4 @@
 Pmax=?[F p1=true]
 Pmax=?[F p2=true]
 Pmax=?[F p3=true]
+Pmax=?[F p1=true&p2=true&p3=true]

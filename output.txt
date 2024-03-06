@@ -1,3 +1,4 @@
-req: 0, result: 0.75
-req: 1, result: 0.5
-req: 2, result: 1.0
+goal: 1, result: 0.75
+goal: 2, result: 0.5
+goal: 3, result: 1.0
+goal: 4, result: 0.25
